@@ -1,0 +1,19 @@
+{
+  "name": "yahee-music-player",
+  "version": "1.0.0",
+  "description": "学习Electron开发。",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "electron": "^35.1.5"
+  },
+  "dependencies": {
+    "music-metadata": "^11.1.1"
+  }
+}

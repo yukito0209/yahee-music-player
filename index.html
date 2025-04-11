@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'">
+    <!-- 更新标题 -->
+    <title>YAHEE MUSIC</title> 
+    <style>
+        /* 使用 4 个空格缩进 */
+        body { 
+            font-family: sans-serif; 
+            display: flex; 
+            flex-direction: column; 
+            height: 100vh; 
+            margin: 0; 
+        }
+        .main-content { 
+            flex-grow: 1; 
+            display: flex; 
+            overflow: hidden; 
+        }
+        #playlist-container { 
+            width: 300px; 
+            border-right: 1px solid #ccc; 
+            overflow-y: auto; 
+            padding: 10px; 
+            background-color: #f8f8f8; 
+            display: flex; 
+            flex-direction: column;
+        }
+        #playlist-header { 
+            display: flex;
+            justify-content: space-between; 
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        #playlist-header h2 {
+            margin: 0; 
+        }
+        .playlist-buttons button { 
+            margin-left: 5px; 
+        }
+        #player-controls { 
+            padding: 15px; 
+            flex-grow: 1; 
+            display: flex; 
+            flex-direction: column; 
+
+            /* --- 添加背景图片 --- */
+            background-image: url('./assets/background.png'); /* <-- 修改为你图片的文件名和路径 */
+            background-size: cover; /* 让图片覆盖整个区域，可能会裁剪 */
+            /* 或者使用 contain: background-size: contain; 让图片完整显示，可能会留白 */
+            background-repeat: no-repeat; /* 不重复平铺图片 */
+            background-position: center center; /* 图片居中显示 */
+            
+            /* --- 可能需要调整文字颜色以保证可读性 --- */
+            /* color: white; 如果背景图是深色的，将文字改为白色 */
+            text-shadow: 1px 1px 2px black; /* 或者给文字添加阴影 */
+        }
+        /* 可能还需要调整标题颜色 */
+        #player-controls h1 {
+            color: white; /* 如果上面设置了 player-controls 的 color，这里通常会继承 */
+            text-align: center; /* 让标题居中可能更好看 */
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.7); /* 给标题加点阴影 */
+            margin-bottom: 20px; /* 增加标题和下方内容的间距 */
+        }
+        #playlist { 
+            list-style: none; 
+            padding: 0; 
+            margin: 0; 
+            flex-grow: 1; 
+            overflow-y: auto; 
+        }
+        #playlist li { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            padding: 8px 12px; 
+            border-bottom: 1px solid #eee; 
+            cursor: grab; /* 改为 grab 光标，表示可拖动 */
+            font-size: 14px; 
+            /* 添加过渡效果，使样式变化更平滑 */
+            transition: background-color 0.2s ease-in-out, opacity 0.2s ease-in-out;
+        }
+        #playlist li .track-title { 
+            white-space: nowrap; 
+            overflow: hidden; 
+            text-overflow: ellipsis;
+            flex-grow: 1; 
+            margin-right: 10px; 
+            /* 防止标题本身成为拖动事件的目标 */
+            /* pointer-events: none; */
+        }
+        #playlist li:hover { 
+            background-color: #e0e0e0; 
+        }
+        #playlist li.playing { 
+            background-color: #cce5ff; 
+            font-weight: bold; 
+        }
+        #playlist li .delete-track-btn { 
+            background: none;
+            border: none;
+            color: #ff4d4d; 
+            cursor: pointer;
+            font-size: 16px; 
+            padding: 0 5px; 
+            display: none; 
+            /* 确保删除按钮不会干扰拖放 */
+            pointer-events: auto; 
+        }
+        #playlist li:hover .delete-track-btn { 
+            display: inline-block; 
+        }
+        
+        /* --- 拖放样式 --- */
+        #playlist li.dragging { /* 正在被拖动的项目的样式 */
+            opacity: 0.5;
+            background-color: #d0d0d0;
+            cursor: grabbing; /* 拖动时的光标 */
+        }
+        #playlist li.over { /* 当拖动项悬停在其上方时的目标项目的样式 */
+            /* 添加一个上边框或下边框来指示插入位置 */
+            border-top: 2px solid #007bff; 
+            background-color: #e9f5ff; /* 轻微的背景高亮 */
+        }
+
+        #track-info { 
+            margin-top: 10px; 
+            font-style: italic; 
+            min-height: 1.2em; 
+            background-color: rgba(0, 0, 0, 0.5); /* 添加半透明黑色背景提高可读性 */
+            padding: 5px 10px; /* 给背景加点内边距 */
+            border-radius: 4px; /* 加点圆角 */
+            color: white; /* 确保文字是白色 */
+            text-align: center; /* 居中 */
+        }
+        #audio-player { 
+            width: 100%; 
+            margin-top: 15px; 
+            /* filter: invert(1) hue-rotate(180deg); */ /* 尝试反色处理控件，效果可能不理想 */
+        }
+        button { 
+            padding: 8px 15px; 
+            cursor: pointer; 
+        }
+    </style>
+</head>
+<body>
+    <div class="main-content">
+        <div id="playlist-container">
+            <div id="playlist-header">
+                <h2>播放列表</h2>
+                <div class="playlist-buttons">
+                    <button id="add-files-btn">添加</button>
+                    <button id="clear-playlist-btn">清空</button> 
+                </div>
+            </div>
+            <!-- 给 ul 添加事件监听器 -->
+            <ul id="playlist"> 
+                <!-- 列表项 li 需要设置 draggable="true" -->
+            </ul>
+        </div>
+
+        <div id="player-controls">
+            <!-- 更新播放器标题 -->
+            <h1>YAHEE MUSIC</h1>
+            <div id="track-info">
+                当前未选择文件
+            </div>
+            <audio id="audio-player" controls></audio>
+        </div>
+    </div>
+
+    <script src="./renderer.js"></script>
+</body>
+</html>
