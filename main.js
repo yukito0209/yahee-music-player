@@ -1,13 +1,15 @@
 // main.js
-const { app, BrowserWindow, ipcMain, dialog } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, Menu } = require('electron');
 const path = require('path');
 const mm = require('music-metadata');
 
 // 创建浏览器窗口函数
 const createWindow = () => {
     const mainWindow = new BrowserWindow({
-        width: 800,
-        height: 600,
+        width: 1280,
+        height: 720,
+        // --- 添加 icon 属性 ---
+        icon: path.join(__dirname, 'assets/icon.png'), // <-- 指向你的图标文件路径
         webPreferences: {
             // __dirname 指向当前文件的路径
             // path.join 用于拼接路径
@@ -22,8 +24,11 @@ const createWindow = () => {
     // 加载 index.html 文件
     mainWindow.loadFile('index.html');
 
+    // --- 添加这行来移除菜单栏 ---
+    Menu.setApplicationMenu(null); // 设置应用程序菜单为 null 即可隐藏
+
     // 可选：打开开发者工具（用于调试）
-    mainWindow.webContents.openDevTools();
+    // mainWindow.webContents.openDevTools();
 };
 
 // Electron 应用已准备好时，创建窗口

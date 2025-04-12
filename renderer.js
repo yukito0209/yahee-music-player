@@ -6,6 +6,8 @@ const clearPlaylistBtn = document.getElementById('clear-playlist-btn'); // 获�
 const trackInfoDiv = document.getElementById('track-info');
 const audioPlayer = document.getElementById('audio-player');
 const playlistUl = document.getElementById('playlist'); // 获取 ul 元素
+const togglePlaylistBtn = document.getElementById('toggle-playlist-btn'); // 获取切换按钮
+const playlistContainer = document.getElementById('playlist-container'); // 获取播放列表容器
 
 // --- State ---
 let playlistData = []; // 存储播放列表数据 { filePath: string, metadata: object | null, displayTitle: string }
@@ -392,6 +394,26 @@ addFilesBtn.addEventListener('click', async () => {
 
 // 清空按钮点击事件
 clearPlaylistBtn.addEventListener('click', clearPlaylist);
+
+// 播放列表切换按钮点击事件
+togglePlaylistBtn.addEventListener('click', () => {
+    console.log('[togglePlaylistBtn] Clicked.');
+    // 切换 playlist-hidden 类
+    playlistContainer.classList.toggle('playlist-hidden');
+
+    // 根据是否包含 'playlist-hidden' 类来更新按钮图标
+    if (playlistContainer.classList.contains('playlist-hidden')) {
+        // 如果已隐藏，显示右指向图标 (表示点击会显示)
+        togglePlaylistBtn.innerHTML = '&#x25B6;'; // ►
+        togglePlaylistBtn.title = '显示播放列表';
+        console.log('[togglePlaylistBtn] Playlist hidden.');
+    } else {
+        // 如果已显示，显示左指向图标 (表示点击会隐藏)
+        togglePlaylistBtn.innerHTML = '&#x25C0;'; // ◀
+        togglePlaylistBtn.title = '隐藏播放列表';
+        console.log('[togglePlaylistBtn] Playlist shown.');
+    }
+});
 
 // 音频播放结束事件 - 自动播放下一首
 audioPlayer.addEventListener('ended', () => {
