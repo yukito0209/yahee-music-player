@@ -1,19 +1,60 @@
 {
   "name": "yahee-music-player",
   "version": "1.0.0",
-  "description": "学习Electron开发。",
+  "description": "一个简洁美观的本地音乐播放器",
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dist": "electron-builder"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "music",
+    "player",
+    "electron"
+  ],
+  "author": "Kerwin Wang <yukitoqaq@gmail.com>",
+  "homepage": "https://github.com/yukito0209/yahee-music-player",
   "license": "ISC",
   "devDependencies": {
-    "electron": "^35.1.5"
+    "electron": "^35.1.5",
+    "electron-builder": "^26.0.12"
   },
   "dependencies": {
     "music-metadata": "^11.1.1"
+  },
+  "build": {
+    "appId": "com.yukito0209.yaheemusic",
+    "productName": "YAHEE MUSIC",
+    "directories": {
+      "output": "dist",
+      "buildResources": "assets"
+    },
+    "files": [
+      "**/*",
+      "!node_modules${/*}",
+      "node_modules/music-metadata${/*}",
+      "assets/**/*"
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "assets/icon.ico"
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "assets/icon.icns",
+      "category": "public.app-category.music"
+    },
+    "linux": {
+      "target": "AppImage",
+      "icon": "assets",
+      "category": "AudioVideo;Audio;"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    }
   }
 }
