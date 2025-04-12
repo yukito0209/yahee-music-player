@@ -55,4 +55,5 @@ YAHEE MUSIC 的第一个版本！这是一款基于 Electron 构建的、注重�
 
 ---
 **界面展示**
+
 ![image](https://github.com/user-attachments/assets/b85b062e-7de8-45df-94a0-753a62602162)
