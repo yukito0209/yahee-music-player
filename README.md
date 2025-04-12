@@ -32,7 +32,7 @@ YAHEE MUSIC 的第一个版本！这是一款基于 Electron 构建的、注重�
 
 ## 🚀 下载与安装
 
-请在下方的 **Assets** 中下载适合你操作系统的文件：
+请在 **Releases** 中下载适合你操作系统的文件：
 
 *   **目前仅支持 Windows 用户:**
     *   **推荐:** 下载 `YAHEE-MUSIC-1.0.0-win-portable.zip`。解压后，直接运行文件夹内的 `YAHEE MUSIC.exe` 即可。
