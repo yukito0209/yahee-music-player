@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'">
+    <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'; img-src 'self' data:;">
     <!-- 更新标题 -->
     <title>YAHEE MUSIC</title> 
     <style>
@@ -244,8 +244,28 @@
             transform: scale(1.0); /* 按下时恢复原大小 */
         }
 
+        /* --- 新增：专辑封面容器样式 --- */
+        #album-art-container {
+            width: 180px; /* 设置容器宽度 */
+            height: 180px; /* 设置容器高度 */
+            margin: 15px auto; /* 上下边距 15px，左右自动居中 */
+            border-radius: 8px; /* 圆角 */
+            overflow: hidden; /* 隐藏超出部分的图片 */
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3); /* 添加阴影 */
+            background-color: rgba(0, 0, 0, 0.2); /* 默认背景，防止图片加载时空白 */
+        }
+
+        /* --- 新增：专辑封面图片样式 --- */
+        #album-art-img {
+            display: block; /* 移除图片下方的空隙 */
+            width: 100%; /* 图片宽度填满容器 */
+            height: 100%; /* 图片高度填满容器 */
+            object-fit: cover; /* 保持图片比例，覆盖整个容器 (可能会裁剪) */
+            /* 或者使用 contain: object-fit: contain; 完整显示图片，可能会留白 */
+        }
+
         #track-info { 
-            margin-top: 5px; 
+            margin-top: 0px; 
             margin-bottom: 15px; /* 增加和播放条的间距 */
             font-style: italic; 
             min-height: 1.2em; 
@@ -274,14 +294,78 @@
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15); /* 可选：细微阴影 */
 
             /* 布局和间距 */
-            padding: 10px 15px; /* 在容器内部留出空间 */
-            margin-left: 10px; /* 与父容器边缘留出距离 */
-            margin-right: 10px;
-            margin-bottom: 10px; /* 与父容器底部留出距离 */
-            box-sizing: border-box; /* 让 padding 包含在宽度内 */
+            padding: 5px 15px; /* 稍微减少垂直内边距 */
+            display: flex; /* 使用 Flexbox 布局内部控件 */
+            align-items: center; /* 垂直居中对齐控件 */
+        }
+        .custom-controls {
+            display: flex;
+            align-items: center; /* 垂直居中 */
+            width: 100%; /* 占据整个 wrapper 宽度 */
+            gap: 15px; /* 控制项之间的间距 */
+            color: white; /* 默认文字颜色 */
+        }
+        /* 时间显示样式 */
+        .time-display {
+            font-size: 12px;
+            min-width: 40px; /* 给时间留出固定宽度，防止跳动 */
+            text-align: center;
+            opacity: 0.8;
+        }
+        .current-time {
+            text-align: right; /* 当前时间靠右 */
+        }
+        .total-time {
+            text-align: left; /* 总时间靠左 */
+        }
+        /* 控制按钮组 */
+        .control-buttons {
+            display: flex;
+            align-items: center;
+            gap: 10px; /* 按钮之间的间距 */
+            /* margin: 0 auto; */ /* 如果想让按钮组居中，可以取消注释，但需要调整 flex 布局 */
+        }
+        /* 通用按钮样式 */
+        .control-button {
+            background: none;
+            border: none;
+            padding: 5px;
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.8); /* 图标颜色 */
+            transition: color 0.2s ease, transform 0.1s ease;
+            line-height: 0; /* 移除按钮默认行高，避免影响 SVG 对齐 */
+        }
+        .control-button:hover {
+            color: white; /* 悬停时变亮 */
+        }
+        .control-button:active {
+            transform: scale(0.9); /* 按下时缩小 */
+        }
+        /* 播放/暂停按钮特殊样式 */
+        #play-pause-btn {
+            /* 可以让它稍微大一点 */
+            padding: 8px; 
+            background-color: rgba(255, 255, 255, 0.2); /* 给个背景 */
+            border-radius: 50%; /* 圆形 */
+        }
+        #play-pause-btn:hover {
+            background-color: rgba(255, 255, 255, 0.35);
+        }
+        /* 进度条容器 (暂时占位) */
+        .progress-bar-container {
+            flex-grow: 1; /* 让它占据中间的剩余空间 */
+            height: 4px; /* 进度条高度 */
+            background-color: rgba(255, 255, 255, 0.2); /* 进度条背景 */
+            border-radius: 2px;
+            cursor: pointer; /* 准备用于点击跳转 */
+             margin: 0 10px; /* 与时间显示留点距离 */
+        }
+        /* 音量控制容器 (暂时占位) */
+        .volume-control-container {
+            /* 样式待定 */
         }
         #audio-player { 
-            display: block; /* 确保 audio 元素是块级，以便应用宽度 */
+            display: none !important; /* 强制隐藏 */
             width: 95%; 
             background: transparent;
             background-color: transparent !important; 
@@ -353,11 +437,50 @@
             </button>
 
             <h1>YAHEE MUSIC</h1>
+
+            <!-- 新增：专辑封面显示区域 -->
+            <div id="album-art-container"> 
+                <img id="album-art-img" src="./assets/default-cover.png" alt="Album Art"> 
+            </div>
+            <!-- 结束：专辑封面显示区域 -->
+
             <div id="track-info">
                 当前播放: ...
             </div>
             <div id="player-bar-wrapper">
-                <audio id="audio-player" controls></audio>
+                <audio id="audio-player"></audio>
+
+                <!-- 新增：自定义控件容器 -->
+                <div class="custom-controls">
+                    <!-- 时间显示 -->
+                    <span class="time-display current-time">0:00</span>
+                    <!-- 播放控制按钮 -->
+                    <div class="control-buttons">
+                        <button id="prev-btn" class="control-button" title="上一首">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></svg>
+                        </button>
+                        <button id="play-pause-btn" class="control-button play" title="播放">
+                            <!-- 播放图标 (初始) -->
+                            <svg class="play-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="28" height="28"><path d="M8 5v14l11-7z"/></svg>
+                            <!-- 暂停图标 (初始隐藏) -->
+                            <svg class="pause-icon" style="display: none;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="28" height="28"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+                        </button>
+                        <button id="next-btn" class="control-button" title="下一首">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+                        </button>
+                    </div>
+                    <!-- 时间显示 -->
+                    <span class="time-display total-time">0:00</span>
+                    <!-- 进度条容器 (暂时留空，下一步添加) -->
+                    <div class="progress-bar-container">
+                        <!-- <input type="range" id="progress-bar" value="0" step="0.1"> -->
+                    </div>
+                    <!-- 音量控制容器 (暂时留空，更后面添加) -->
+                    <div class="volume-control-container">
+                        <!-- ... -->
+                    </div>
+                </div>
+                <!-- 自定义控件容器结束 -->
             </div>
         </div>
     </div>

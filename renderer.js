@@ -1,5 +1,3 @@
-// renderer.js
-
 // --- DOM Elements ---
 const addFilesBtn = document.getElementById('add-files-btn');
 const clearPlaylistBtn = document.getElementById('clear-playlist-btn'); // 获取清空按钮
@@ -8,11 +6,21 @@ const audioPlayer = document.getElementById('audio-player');
 const playlistUl = document.getElementById('playlist'); // 获取 ul 元素
 const togglePlaylistBtn = document.getElementById('toggle-playlist-btn'); // 获取切换按钮
 const playlistContainer = document.getElementById('playlist-container'); // 获取播放列表容器
+const albumArtImg = document.getElementById('album-art-img'); // 获取封面图片元素
+const defaultCoverPath = './assets/default-cover.png'; // 定义默认封面路径
+const playPauseBtn = document.getElementById('play-pause-btn');
+const prevBtn = document.getElementById('prev-btn');
+const nextBtn = document.getElementById('next-btn');
+const currentTimeSpan = document.querySelector('.current-time');
+const totalTimeSpan = document.querySelector('.total-time');
+const playIcon = playPauseBtn.querySelector('.play-icon');
+const pauseIcon = playPauseBtn.querySelector('.pause-icon');
 
 // --- State ---
 let playlistData = []; // 存储播放列表数据 { filePath: string, metadata: object | null, displayTitle: string }
 let currentTrackIndex = -1; // 当前播放曲目的索引, -1 表示没有播放
 let draggedIndex = null; // 用于存储正在拖动的项目的索引
+let isHandlingError = false; // 添加一个标志位，防止错误处理重入
 // let currentlyPlayingFilePath = null; // 用于在重新排序时跟踪当前播放歌曲
 
 // --- Helper Functions ---
@@ -36,6 +44,16 @@ function getFilename(filePath) {
     if (!filePath) return '';
     const parts = filePath.replace(/\\/g, '/').split('/');
     return parts[parts.length - 1];
+}
+
+// 格式化时间 (秒 -> MM:SS)
+function formatTime(seconds) {
+    if (isNaN(seconds) || seconds < 0) {
+        return '0:00';
+    }
+    const minutes = Math.floor(seconds / 60);
+    const secs = Math.floor(seconds % 60);
+    return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
 }
 
 // 更新播放列表 UI (添加 console.log)
@@ -113,8 +131,21 @@ function updatePlaylistUI(currentPlayingPath = null) {
     console.log('[updatePlaylistUI] Finished. Final currentTrackIndex:', currentTrackIndex); 
 }
 
-// 播放指定索引的曲目 (添加 console.log)
-function playTrack(index) {
+// 更新播放/暂停按钮的图标和 title
+function updatePlayPauseButton(isPlaying) {
+    if (isPlaying) {
+        playIcon.style.display = 'none';
+        pauseIcon.style.display = 'inline-block'; // 或者 'block'
+        playPauseBtn.title = '暂停';
+    } else {
+        playIcon.style.display = 'inline-block'; // 或者 'block'
+        pauseIcon.style.display = 'none';
+        playPauseBtn.title = '播放';
+    }
+}
+
+// 播放指定索引的曲目 (修改以加载封面)
+async function playTrack(index) {
     console.log(`[playTrack] Attempting to play index: ${index}`);
     if (index < 0 || index >= playlistData.length) {
         console.warn('[playTrack] Invalid track index or playlist empty. Stopping playback.');
@@ -133,33 +164,89 @@ function playTrack(index) {
 
     currentTrackIndex = index; 
     const trackToPlay = playlistData[currentTrackIndex];
-    
+    console.log(`[playTrack] File path to play: ${trackToPlay.filePath}`); // <-- 添加日志
+    console.log(`[playTrack] Display title: ${trackToPlay.displayTitle}`); // <-- 添加日志
+
+    // --- 检查路径是否看起来有效 ---
+    if (!trackToPlay.filePath || typeof trackToPlay.filePath !== 'string') {
+        console.error('[playTrack] Invalid file path found in playlist data!', trackToPlay);
+        handlePlaybackError(); // 触发错误处理
+        return; // 阻止继续执行
+    }
+    // --- 检查结束 ---
+
     console.log(`[playTrack] Setting currentTrackIndex to: ${currentTrackIndex}`);
     console.log(`[playTrack] Playing track: ${trackToPlay.displayTitle}, Path: ${trackToPlay.filePath}`);
-
     trackInfoDiv.textContent = `当前播放: ${trackToPlay.displayTitle}`;
+
+    // --- 修改：设置 src，但不显式调用 load ---
     audioPlayer.src = trackToPlay.filePath;
-    audioPlayer.load(); 
-    audioPlayer.play().catch(e => {
-        console.error("[playTrack] Error playing audio:", e);
-        // 可以在这里调用错误处理逻辑，比如尝试下一首
-        handlePlaybackError(); 
-    }); 
+    // audioPlayer.load(); // 移除或注释掉这行，设置 src 通常会自动加载
+    // --- 修改结束 ---
+
+    const playPromise = audioPlayer.play(); 
+
+    // --- 新增：异步获取并设置专辑封面 ---
+    // 先设置为默认封面
+    albumArtImg.src = defaultCoverPath; 
+    try {
+        console.log(`[playTrack] Requesting album art for: ${trackToPlay.filePath}`);
+        const imageUrl = await window.electronAPI.getAlbumArt(trackToPlay.filePath);
+        if (imageUrl) {
+            console.log('[playTrack] Received album art data URL.');
+            albumArtImg.src = imageUrl; // 设置获取到的封面
+        } else {
+            console.log('[playTrack] No album art received, keeping default.');
+            // 如果没有获取到，保持默认封面即可，因为上面已经设置了
+        }
+    } catch (error) {
+        console.error('[playTrack] Error getting album art:', error);
+        albumArtImg.src = defaultCoverPath; // 出错时也设置为默认
+    }
+    // --- 封面逻辑结束 ---
+
+    // 确保播放操作完成（虽然我们不一定需要等待它）
+    if (playPromise !== undefined) {
+        playPromise.catch(e => {
+            // 检查是否是用户中止的错误，如果是，可以不视为严重错误
+            if (e.name === 'AbortError') {
+                console.warn(`[playTrack] Playback aborted (likely due to rapid transition): ${e.message}`);
+            } else {
+                console.error("[playTrack] Error playing audio:", e);
+                handlePlaybackError(); 
+            }
+        });
+    }
 
     console.log('[playTrack] Calling updatePlaylistUI to highlight track.');
     updatePlaylistUI(); // 更新 UI 以高亮新播放的曲目
 }
 
-// 停止播放并清除状态 (添加 console.log)
+// 停止播放并清除状态 (修改以重置封面)
+// stopPlayback 函数确保重置状态和 UI (修改版)
 function stopPlayback() {
     console.log('[stopPlayback] Stopping playback and clearing state.');
-    audioPlayer.pause();
-    audioPlayer.src = '';
+    audioPlayer.pause(); // 先暂停
+
+    // --- 谨慎地清空 src ---
+    // 检查 src 是否已经是空的，避免不必要的设置
+    if (audioPlayer.src && audioPlayer.src !== '') {
+        console.log('[stopPlayback] Clearing audio source.');
+        audioPlayer.src = '';
+        // 在清空 src 后不建议立即调用 load()，因为它可能在空 src 上也触发事件
+        // audioPlayer.load(); 
+    } else {
+        console.log('[stopPlayback] Audio source already empty or not set.');
+    }
+    // --- src 清空结束 ---
+
     const oldIndex = currentTrackIndex;
     currentTrackIndex = -1;
     trackInfoDiv.textContent = '当前未播放';
-    console.log(`[stopPlayback] Set currentTrackIndex to -1 (was ${oldIndex}). Calling updatePlaylistUI.`);
-    updatePlaylistUI(); // 停止时也需要更新UI（移除高亮）
+    albumArtImg.src = defaultCoverPath; 
+    updatePlayPauseButton(false); // 确保按钮是播放状态
+    console.log(`[stopPlayback] Set currentTrackIndex to -1 (was ${oldIndex}). Reset album art. Calling updatePlaylistUI.`);
+    updatePlaylistUI(); 
 }
 
 // 删除指定索引的曲目 (添加 console.log)
@@ -214,12 +301,13 @@ function deleteTrack(indexToDelete) {
     console.log('[deleteTrack] Finished. Playlist size:', playlistData.length);
 }
 
-// 清空整个播放列表 (添加 console.log)
+// 清空整个播放列表 (修改以重置封面)
 function clearPlaylist() {
     console.log('[clearPlaylist] Clearing playlist.');
     stopPlayback(); // stopPlayback 会清空状态并调用 updatePlaylistUI
     playlistData = []; 
     trackInfoDiv.textContent = '播放列表已清空';
+    // albumArtImg.src = defaultCoverPath; // stopPlayback 已经做了
     console.log('[clearPlaylist] Playlist data cleared.');
     // updatePlaylistUI(); // stopPlayback 已调用
 }
@@ -370,7 +458,8 @@ addFilesBtn.addEventListener('click', async () => {
     const newFiles = await window.electronAPI.openFile();
 
     if (newFiles && newFiles.length > 0) {
-        console.log(`[addFilesBtn] Received ${newFiles.length} new files.`);
+        console.log('[addFilesBtn] Received file data from main process:', JSON.stringify(newFiles, null, 2));
+        
         const newPlaylistItems = newFiles.map(fileInfo => ({
             ...fileInfo, 
             displayTitle: getDisplayTitle(fileInfo) 
@@ -418,10 +507,21 @@ togglePlaylistBtn.addEventListener('click', () => {
 // 音频播放结束事件 - 自动播放下一首
 audioPlayer.addEventListener('ended', () => {
     console.log('Track ended. Playing next.');
-    if (currentTrackIndex === -1 || playlistData.length === 0) {
-        // 如果没有有效索引或列表为空，则不执行任何操作
-        return;
+    currentTimeSpan.textContent = formatTime(0); 
+    updatePlayPauseButton(false); 
+
+    // --- 增加检查 ---
+    if (currentTrackIndex === -1 || playlistData.length === 0) { 
+        console.log('[audioEnded] No valid current track or empty playlist, stopping.');
+        // 确保完全停止，以防万一 stopPlayback 没完全清理干净
+        if (!audioPlayer.paused) audioPlayer.pause();
+        if (audioPlayer.src) audioPlayer.src = '';
+        currentTrackIndex = -1; // 再次确认索引
+        updatePlaylistUI(); // 更新高亮（应该没有高亮了）
+        return; 
     }
+    // --- 检查结束 --
+
     const nextIndex = currentTrackIndex + 1;
     if (nextIndex >= playlistData.length) {
         console.log('End of playlist reached.');
@@ -434,27 +534,31 @@ audioPlayer.addEventListener('ended', () => {
     }
 });
 
-// 辅助函数处理播放错误后的逻辑
+// 辅助函数处理播放错误后的逻辑 (修改版)
 function handlePlaybackError() {
+    // --- 防止错误处理重入 ---
+    if (isHandlingError) {
+        console.warn('[handlePlaybackError] Already handling an error, ignoring subsequent error.');
+        return; // 如果已经在处理错误，则直接返回，避免循环
+    }
+    isHandlingError = true; // 标记开始处理错误
     console.warn('[handlePlaybackError] Handling playback error.');
+    // --- 重入保护结束 ---
+
     const trackInfo = currentTrackIndex !== -1 ? playlistData[currentTrackIndex] : null;
     const trackName = trackInfo ? trackInfo.displayTitle : '文件';
     trackInfoDiv.textContent = `错误: 无法播放 ${trackName}。`;
 
-    if (currentTrackIndex !== -1 && playlistData.length > 1) {
-        console.log('[handlePlaybackError] Attempting to play next track.');
-        const nextIndex = (currentTrackIndex + 1) % playlistData.length; 
-        // 检查下一首是否就是当前出错的这首（如果列表只有一首会发生）
-        if (nextIndex === currentTrackIndex) {
-            console.warn('[handlePlaybackError] Next track is the same as the erroring one. Stopping.');
-            stopPlayback();
-        } else {
-            playTrack(nextIndex);
-        }
-    } else {
-        console.warn('[handlePlaybackError] Playlist empty or only one track. Stopping.');
-        stopPlayback();
-    }
+    console.log('[handlePlaybackError] Stopping playback due to error.');
+    stopPlayback(); // 调用 stopPlayback 清理状态
+
+    // --- 延迟重置错误处理标志 ---
+    // 给一小段时间让状态稳定下来，避免因清理操作本身触发的瞬时错误导致循环
+    setTimeout(() => {
+        isHandlingError = false;
+        console.log('[handlePlaybackError] Error handling flag reset.');
+    }, 100); // 100毫秒延迟
+    // --- 延迟结束 ---
 }
 
 audioPlayer.addEventListener('canplay', () => {
@@ -467,6 +571,151 @@ audioPlayer.addEventListener('canplay', () => {
         // 如果因为某种原因索引是 -1 但 canplay 触发了，确保信息一致
         trackInfoDiv.textContent = '当前未播放';
     }
+});
+
+// 播放/暂停按钮点击事件
+playPauseBtn.addEventListener('click', () => {
+    if (!audioPlayer.src) { // 检查是否有音频源
+        console.log('[playPauseBtn] No audio source loaded.');
+        // 可以考虑播放列表的第一首歌，如果列表不为空
+        if(playlistData.length > 0 && currentTrackIndex === -1) {
+            playTrack(0);
+        }
+        return; 
+    }
+
+    if (audioPlayer.paused) {
+        console.log('[playPauseBtn] Audio paused, playing...');
+        audioPlayer.play().catch(handlePlaybackError); // 播放并处理潜在错误
+    } else {
+        console.log('[playPauseBtn] Audio playing, pausing...');
+        audioPlayer.pause();
+    }
+    // 注意：播放状态的图标更新将在 'play' 和 'pause' 事件中处理
+});
+
+// 上一首按钮点击事件
+prevBtn.addEventListener('click', () => {
+    console.log('[prevBtn] Clicked.');
+    if (playlistData.length === 0) return; // 列表为空则不操作
+    let prevIndex = currentTrackIndex - 1;
+    if (prevIndex < 0) {
+        prevIndex = playlistData.length - 1; // 循环到最后一首
+    }
+    playTrack(prevIndex);
+});
+
+// 下一首按钮点击事件
+nextBtn.addEventListener('click', () => {
+    console.log('[nextBtn] Clicked.');
+    if (playlistData.length === 0) return; // 列表为空则不操作
+    let nextIndex = currentTrackIndex + 1;
+    if (nextIndex >= playlistData.length) {
+        nextIndex = 0; // 循环到第一首
+    }
+    playTrack(nextIndex);
+});
+
+// --- Audio Element Event Listeners ---
+
+// 当音频开始播放时
+audioPlayer.addEventListener('play', () => {
+    console.log('[audioEvent] Play event triggered.');
+    updatePlayPauseButton(true); // 更新按钮为暂停状态
+});
+
+// 当音频暂停时
+audioPlayer.addEventListener('pause', () => {
+    console.log('[audioEvent] Pause event triggered.');
+    updatePlayPauseButton(false); // 更新按钮为播放状态
+});
+
+// 当音频元数据加载完成时 (获取总时长)
+audioPlayer.addEventListener('loadedmetadata', () => {
+    console.log('[audioEvent] Loaded metadata.');
+    totalTimeSpan.textContent = formatTime(audioPlayer.duration);
+    // 在这里设置进度条的最大值 (下一步实现)
+    // progressBar.max = audioPlayer.duration;
+});
+
+// 当播放时间更新时
+audioPlayer.addEventListener('timeupdate', () => {
+    // console.log('[audioEvent] Time update:', audioPlayer.currentTime); // 这个日志太频繁，通常注释掉
+    currentTimeSpan.textContent = formatTime(audioPlayer.currentTime);
+    // 在这里更新进度条的值 (下一步实现)
+    // if (!isSeeking) { // 防止用户拖动时冲突
+    //    progressBar.value = audioPlayer.currentTime;
+    // }
+});
+
+// 当音频播放结束时 (除了播放下一首，也重置时间显示)
+audioPlayer.addEventListener('ended', () => {
+    // --- 添加非常详细的日志 ---
+    console.log('------------------------------------'); // 分隔符
+    console.log('[audioEnded] Event triggered.');
+    console.log(`[audioEnded] currentTrackIndex BEFORE processing: ${currentTrackIndex}`);
+    console.log(`[audioEnded] playlistData.length: ${playlistData.length}`);
+    // --- 日志结束 ---
+
+    currentTimeSpan.textContent = formatTime(0); // 重置当前时间显示
+    // totalTimeSpan.textContent = formatTime(0); // 总时长通常保留
+    updatePlayPauseButton(false); // 确保按钮是播放状态
+
+    // 检查索引有效性
+    if (currentTrackIndex === -1 || playlistData.length === 0) { 
+        console.log('[audioEnded] Condition (currentTrackIndex === -1 || playlistData.length === 0) is TRUE. Stopping.'); // <-- 日志
+        if (!audioPlayer.paused) audioPlayer.pause();
+        if (audioPlayer.src) audioPlayer.src = '';
+        currentTrackIndex = -1; 
+        updatePlaylistUI(); 
+        console.log('------------------------------------'); // 分隔符
+        return; 
+    }
+
+    console.log('[audioEnded] Condition (currentTrackIndex === -1 || playlistData.length === 0) is FALSE. Proceeding...'); // <-- 日志
+
+    const nextIndex = currentTrackIndex + 1;
+    console.log(`[audioEnded] Calculated nextIndex: ${nextIndex}`); // <-- 日志
+
+    // 检查是否到达列表末尾
+    if (nextIndex >= playlistData.length) {
+        console.log('[audioEnded] Condition (nextIndex >= playlistData.length) is TRUE. End of playlist reached.'); // <-- 日志
+        stopPlayback(); 
+        trackInfoDiv.textContent = '播放列表已结束';
+    } else {
+        console.log('[audioEnded] Condition (nextIndex >= playlistData.length) is FALSE. Preparing to play next song.'); 
+        
+        // --- 关键修改：清理状态并延迟播放下一首 ---
+        // console.log('[audioEnded] Clearing src before playing next.');
+        // audioPlayer.src = ''; // 先清空 src，确保完全停止上一个
+        
+        // 使用 setTimeout 给浏览器一点时间处理状态变化
+        setTimeout(() => {
+            console.log(`[audioEnded] setTimeout: Calling playTrack for index ${nextIndex}`);
+            playTrack(nextIndex);
+        }, 50); // 延迟 50 毫秒 (可以尝试调整这个值，0 可能也行，但 50 更稳妥)
+        // --- 修改结束 ---
+    }
+    console.log('------------------------------------'); // 分隔符
+});
+
+// 错误处理
+audioPlayer.addEventListener('error', (e) => {
+    console.error('[audioError] Audio Element Error Event:', e);
+    // 尝试打印更详细的错误信息
+    if (e.target && e.target.error) {
+        console.error('[audioError] MediaError details:', {
+            code: e.target.error.code, // 错误代码
+            message: e.target.error.message // 错误信息
+        });
+        // 常见的 MediaError 代码:
+        // 1: MEDIA_ERR_ABORTED - 用户中止
+        // 2: MEDIA_ERR_NETWORK - 网络错误
+        // 3: MEDIA_ERR_DECODE - 解码错误
+        // 4: MEDIA_ERR_SRC_NOT_SUPPORTED - 源不支持或无效
+    }
+    // 调用统一的错误处理函数
+    handlePlaybackError();
 });
 
 // --- Initial Load ---
