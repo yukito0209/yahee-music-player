@@ -1,18 +1,30 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'; img-src 'self' data:;">
+    <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com;">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- 更新标题 -->
     <title>YAHEE MUSIC</title> 
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Klee+One:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css"> <!-- 如果你把 CSS 分离了 -->
+
     <style>
         /* 使用 4 个空格缩进 */
         body { 
-            font-family: sans-serif; 
+            font-family: 'Klee One', sans-serif; 
             display: flex; 
             flex-direction: column; 
             height: 100vh; 
             margin: 0; 
+            font-weight: 400; /* 例如，默认使用 Regular 字重 */
+        }
+        h1, h2 {
+            font-family: 'Klee One', sans-serif; /* 确保标题也使用 */
+            font-weight: 700; /* 标题使用 Bold 字重 */
         }
         .main-content { 
             flex-grow: 1; 
@@ -87,7 +99,7 @@
             text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7); /* 添加文字阴影提高可读性 */
             cursor: pointer;
             transition: background-color 0.2s ease; /* 添加悬停过渡效果 */
-            font-size: 13px; /* 可以稍微调整字体大小 */
+            font-size: 15px; /* 可以稍微调整字体大小 */
         }
         /* --- 添加悬停效果 --- */
         #playlist-header .playlist-buttons button:hover {
@@ -141,17 +153,21 @@
             border-radius: 5px; /* 给这个半透明层加点圆角 */
             padding: 5px; /* 给列表项和边框之间留点空隙 */
         }
-        #playlist li { 
+        #playlist li {
+            font-family: 'Klee One', sans-serif; /* 确保列表项使用 */
+            font-weight: 400; /* 列表项使用 Regular */ 
             display: flex; 
             justify-content: space-between; 
             align-items: center; 
             padding: 8px 12px; 
             border-bottom: 1px solid rgba(255, 255, 255, 0.2); /* 边框改为浅色半透明 */; 
             cursor: grab; /* 改为 grab 光标，表示可拖动 */
-            font-size: 14px; 
+            font-size: 16px; 
             /* 添加过渡效果，使样式变化更平滑 */
             transition: background-color 0.2s ease-in-out, opacity 0.2s ease-in-out;
             color: white; /* 将列表项文字改为白色 */
+            text-shadow: 1px 1px 2px black;
+            border-radius: 6px;
         }
         #playlist li .track-title { 
             white-space: nowrap; 
@@ -165,10 +181,12 @@
         }
         #playlist li:hover { 
             background-color: rgba(255, 255, 255, 0.2); /* 浅色半透明悬停效果 */
+            border-radius: 6px;
         }
         #playlist li.playing { 
-            background-color: rgba(0, 123, 255, 0.5); /* 半透明蓝色高亮 */
-            font-weight: bold; 
+            background-color: rgba(255, 175, 228, 0.3); /* 半透明粉色高亮 */
+            border-radius: 6px;
+            font-weight: 700; 
             border-bottom-color: transparent; /* 当前播放项可以去掉下边框 */
         }
         #playlist li .delete-track-btn { 
@@ -200,7 +218,9 @@
         /* 调整空列表提示的样式 */
         #playlist li:only-child { /* 应用于列表只有一个li元素时（即空提示） */
             background-color: transparent !important; /* 移除为列表添加的半透明背景 */
-            color: #ccc; /* 浅灰色文字 */
+            color: #ffffff; /* 白色文字 */
+            font-family: 'Klee One', sans-serif; /* 确保列表项使用 */
+            font-weight: 400; /* 列表项使用 Regular */
             text-align: center;
             cursor: default;
             border-bottom: none; /* 移除边框 */
@@ -269,7 +289,7 @@
             margin-bottom: 15px; /* 增加和播放条的间距 */
             font-style: italic; 
             min-height: 1.2em; 
-            background-color: rgba(0, 0, 0, 0.5); /* 添加半透明黑色背景提高可读性 */
+            background-color: rgba(0, 0, 0, 0.2); /* 添加半透明黑色背景提高可读性 */
             padding: 5px 10px; /* 给背景加点内边距 */
             border-radius: 4px; /* 加点圆角 */
             color: white; /* 确保文字是白色 */
@@ -307,7 +327,7 @@
         }
         /* 时间显示样式 */
         .time-display {
-            font-size: 12px;
+            font-size: 14px;
             min-width: 40px; /* 给时间留出固定宽度，防止跳动 */
             text-align: center;
             opacity: 0.8;
@@ -465,6 +485,9 @@
         button { 
             padding: 8px 15px; 
             cursor: pointer; 
+        }
+        button, input, span { /* 为按钮、输入框、span 等也设置一下 */
+         font-family: inherit; /* 让它们继承 body 的字体 */
         }
         /* --- 自定义播放列表滚动条样式 --- */
         /* 针对 #playlist 元素内的滚动条 */
