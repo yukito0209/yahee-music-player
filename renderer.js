@@ -80,7 +80,7 @@ function updatePlaylistUI(currentPlayingPath = null) {
         const emptyLi = document.createElement('li');
         emptyLi.textContent = '将音乐文件拖放到这里或点击“添加”';
         emptyLi.style.textAlign = 'center';
-        emptyLi.style.color = '#888';
+        // emptyLi.style.color = '#888';
         emptyLi.style.cursor = 'default'; 
         playlistUl.appendChild(emptyLi);
         currentTrackIndex = -1; // 确保空列表时索引为 -1

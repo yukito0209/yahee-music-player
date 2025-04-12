@@ -1,18 +1,30 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'; img-src 'self' data:;">
+    <meta http-equiv="X-Content-Security-Policy" content="default-src 'self'; script-src 'self'; img-src 'self' data:; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com;">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <!-- 更新标题 -->
     <title>YAHEE MUSIC</title> 
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Klee+One:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css"> <!-- 如果你把 CSS 分离了 -->
+
     <style>
         /* 使用 4 个空格缩进 */
         body { 
-            font-family: sans-serif; 
+            font-family: 'Klee One', sans-serif; 
             display: flex; 
             flex-direction: column; 
             height: 100vh; 
             margin: 0; 
+            font-weight: 400; /* 例如，默认使用 Regular 字重 */
+        }
+        h1, h2 {
+            font-family: 'Klee One', sans-serif; /* 确保标题也使用 */
+            font-weight: 700; /* 标题使用 Bold 字重 */
         }
         .main-content { 
             flex-grow: 1; 
@@ -87,7 +99,7 @@
             text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7); /* 添加文字阴影提高可读性 */
             cursor: pointer;
             transition: background-color 0.2s ease; /* 添加悬停过渡效果 */
-            font-size: 13px; /* 可以稍微调整字体大小 */
+            font-size: 15px; /* 可以稍微调整字体大小 */
         }
         /* --- 添加悬停效果 --- */
         #playlist-header .playlist-buttons button:hover {
@@ -141,17 +153,21 @@
             border-radius: 5px; /* 给这个半透明层加点圆角 */
             padding: 5px; /* 给列表项和边框之间留点空隙 */
         }
-        #playlist li { 
+        #playlist li {
+            font-family: 'Klee One', sans-serif; /* 确保列表项使用 */
+            font-weight: 400; /* 列表项使用 Regular */ 
             display: flex; 
             justify-content: space-between; 
             align-items: center; 
             padding: 8px 12px; 
             border-bottom: 1px solid rgba(255, 255, 255, 0.2); /* 边框改为浅色半透明 */; 
             cursor: grab; /* 改为 grab 光标，表示可拖动 */
-            font-size: 14px; 
+            font-size: 16px; 
             /* 添加过渡效果，使样式变化更平滑 */
             transition: background-color 0.2s ease-in-out, opacity 0.2s ease-in-out;
             color: white; /* 将列表项文字改为白色 */
+            text-shadow: 1px 1px 2px black;
+            border-radius: 6px;
         }
         #playlist li .track-title { 
             white-space: nowrap; 
@@ -165,10 +181,12 @@
         }
         #playlist li:hover { 
             background-color: rgba(255, 255, 255, 0.2); /* 浅色半透明悬停效果 */
+            border-radius: 6px;
         }
         #playlist li.playing { 
-            background-color: rgba(0, 123, 255, 0.5); /* 半透明蓝色高亮 */
-            font-weight: bold; 
+            background-color: rgba(255, 175, 228, 0.3); /* 半透明粉色高亮 */
+            border-radius: 6px;
+            font-weight: 700; 
             border-bottom-color: transparent; /* 当前播放项可以去掉下边框 */
         }
         #playlist li .delete-track-btn { 
@@ -200,7 +218,9 @@
         /* 调整空列表提示的样式 */
         #playlist li:only-child { /* 应用于列表只有一个li元素时（即空提示） */
             background-color: transparent !important; /* 移除为列表添加的半透明背景 */
-            color: #ccc; /* 浅灰色文字 */
+            color: #ffffff; /* 白色文字 */
+            font-family: 'Klee One', sans-serif; /* 确保列表项使用 */
+            font-weight: 400; /* 列表项使用 Regular */
             text-align: center;
             cursor: default;
             border-bottom: none; /* 移除边框 */
@@ -269,7 +289,7 @@
             margin-bottom: 15px; /* 增加和播放条的间距 */
             font-style: italic; 
             min-height: 1.2em; 
-            background-color: rgba(0, 0, 0, 0.5); /* 添加半透明黑色背景提高可读性 */
+            background-color: rgba(0, 0, 0, 0.2); /* 添加半透明黑色背景提高可读性 */
             padding: 5px 10px; /* 给背景加点内边距 */
             border-radius: 4px; /* 加点圆角 */
             color: white; /* 确保文字是白色 */
@@ -307,7 +327,7 @@
         }
         /* 时间显示样式 */
         .time-display {
-            font-size: 12px;
+            font-size: 14px;
             min-width: 40px; /* 给时间留出固定宽度，防止跳动 */
             text-align: center;
             opacity: 0.8;
@@ -466,19 +486,20 @@
             padding: 8px 15px; 
             cursor: pointer; 
         }
+        button, input, span { /* 为按钮、输入框、span 等也设置一下 */
+         font-family: inherit; /* 让它们继承 body 的字体 */
+        }
         /* --- 自定义播放列表滚动条样式 --- */
         /* 针对 #playlist 元素内的滚动条 */
         #playlist::-webkit-scrollbar {
             width: 8px; /* 设置滚动条宽度 */
         }
-
         /* 滚动条轨道 (背景) */
         #playlist::-webkit-scrollbar-track {
             background-color: rgba(255, 255, 255, 0.1); /* 设置轨道的背景色 (非常淡的半透明白) */
             border-radius: 10px; /* 给轨道添加圆角 */
             margin: 5px 0; /* 可选：给轨道上下留点边距 */
         }
-
         /* 滚动条滑块 (可拖动部分) */
         #playlist::-webkit-scrollbar-thumb {
             background-color: rgba(255, 255, 255, 0.4); /* 设置滑块的颜色 (稍深一点的半透明白) */
@@ -492,11 +513,54 @@
             background-color: rgba(255, 255, 255, 0.6); /* 悬停时颜色变深 */
             border-color: rgba(255, 255, 255, 0.4);
         }
-
         /* 可选：定义滚动条角落 (如果滚动条同时有水平和垂直) */
         /* #playlist::-webkit-scrollbar-corner {
             background: transparent; 
         } */
+        /* --- 新增：右上角按钮通用样式 --- */
+        .top-right-button {
+            position: absolute; /* 绝对定位 */
+            top: 15px; /* 与顶部距离，和左侧按钮一致 */
+            right: 15px; /* 与右侧边缘距离 */
+            z-index: 10; 
+
+            /* 继承或复用 control-button 的样式 */
+            /* 如果需要，可以覆盖或添加特定样式 */
+            background-color: rgba(255, 255, 255, 0.2); 
+            backdrop-filter: blur(8px); 
+            -webkit-backdrop-filter: blur(8px); 
+            border-radius: 50%; /* 圆形 */
+            border: 1px solid rgba(255, 255, 255, 0.3); 
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); 
+            
+            color: white; /* 确保图标颜色 */
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease; 
+            
+            /* 尺寸和内容对齐 (与左侧按钮一致) */
+            width: 36px; 
+            height: 36px; 
+            padding: 0; 
+            display: inline-flex; /* 使用 flex 居中 SVG */
+            justify-content: center;
+            align-items: center;
+            text-decoration: none; /* 移除链接下划线 */
+        }
+
+        .top-right-button:hover {
+            background-color: rgba(255, 255, 255, 0.35); 
+            transform: scale(1.1); 
+        }
+
+        .top-right-button:active {
+            background-color: rgba(255, 255, 255, 0.15); 
+            transform: scale(1.0); 
+        }
+
+        /* 确保 SVG 图标颜色正确 */
+        .top-right-button svg {
+            fill: currentColor; /* 让 SVG 颜色继承父元素 a 的 color */
+        }
     </style>
 </head>
 <body>
@@ -522,6 +586,14 @@
                 <!-- 使用 Unicode 字符作为简单图标 -->
                 &#x25C0; <!-- 左指向三角 (表示隐藏) -->
             </button>
+            <!-- 新增：GitHub 链接按钮 -->
+            <a href="https://github.com/yukito0209/yahee-music-player" target="_blank" id="github-link-btn" class="control-button top-right-button" title="查看 GitHub 仓库">
+                <!-- GitHub SVG 图标 -->
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="currentColor" width="20" height="20">
+                    <path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"></path>
+                </svg>
+            </a>
+            <!-- GitHub 链接按钮结束 -->
 
             <h1>YAHEE MUSIC</h1>
 
