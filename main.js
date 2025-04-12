@@ -29,7 +29,7 @@ const createWindow = () => {
     Menu.setApplicationMenu(null); // 设置应用程序菜单为 null 即可隐藏
 
     // 可选：打开开发者工具（用于调试）
-    mainWindow.webContents.openDevTools();
+    // mainWindow.webContents.openDevTools();
 };
 
 // Electron 应用已准备好时，创建窗口

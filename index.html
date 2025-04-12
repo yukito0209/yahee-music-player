@@ -353,16 +353,89 @@
         }
         /* 进度条容器 (暂时占位) */
         .progress-bar-container {
-            flex-grow: 1; /* 让它占据中间的剩余空间 */
-            height: 4px; /* 进度条高度 */
-            background-color: rgba(255, 255, 255, 0.2); /* 进度条背景 */
-            border-radius: 2px;
-            cursor: pointer; /* 准备用于点击跳转 */
-             margin: 0 10px; /* 与时间显示留点距离 */
+            flex-grow: 1; 
+            height: 12px; /* 稍微增加高度以便交互 */
+            /* background-color: rgba(255, 255, 255, 0.2); */ /* 移除容器背景，让轨道背景生效 */
+            /* border-radius: 2px; */ /* 移除容器圆角 */
+            cursor: pointer; 
+            margin: 0 10px; 
+            display: flex; /* 让 input 垂直居中 */
+            align-items: center;
+        }
+        /* --- 新增：进度条 input 样式 --- */
+        .progress-bar {
+            -webkit-appearance: none; /* 移除 WebKit 的默认外观 */
+            appearance: none; /* 移除标准浏览器默认外观 */
+            width: 100%; /* 宽度填满容器 */
+            height: 4px; /* 轨道高度 */
+            background: rgba(255, 255, 255, 0.2); /* 轨道背景色 */
+            border-radius: 2px; /* 轨道圆角 */
+            outline: none; /* 移除焦点时的轮廓 */
+            cursor: pointer;
+            transition: background 0.2s ease; /* 可选：添加过渡 */
+        }
+        /* 进度条滑块 (Thumb) 样式 - WebKit */
+        .progress-bar::-webkit-slider-thumb {
+            -webkit-appearance: none; /* 移除默认外观 */
+            appearance: none;
+            width: 14px; /* 滑块宽度 */
+            height: 14px; /* 滑块高度 */
+            background: rgba(255, 255, 255, 0.8); /* 滑块颜色 */
+            border-radius: 50%; /* 圆形滑块 */
+            border: 1px solid rgba(255, 255, 255, 0.5); /* 可选：边框 */
+            cursor: pointer;
+            margin-top: -5px; /* 垂直居中滑块 ( (滑块高度 - 轨道高度) / 2 * -1 ) */
+            transition: background 0.2s ease, transform 0.1s ease;
+        }
+        /* 鼠标悬停/按下时滑块样式 (可选) */
+        .progress-bar:hover::-webkit-slider-thumb {
+            background: white;
+        }
+        .progress-bar:active::-webkit-slider-thumb {
+            transform: scale(1.1); /* 按下时稍微放大 */
         }
         /* 音量控制容器 (暂时占位) */
         .volume-control-container {
-            /* 样式待定 */
+            display: flex; /* 水平排列按钮和滑块 */
+            align-items: center; /* 垂直居中 */
+            gap: 8px; /* 元素间距 */
+            /* 可以设置一个固定宽度或让其内容决定宽度 */
+            width: 130px; /* 示例宽度，可调整 */
+        }
+        /* 音量按钮继承 .control-button 样式，无需太多额外样式 */
+        #volume-btn {
+            /* 如果需要微调可以加在这里 */
+        }
+        /* --- 新增：音量滑块 input 样式 --- */
+        .volume-slider {
+            -webkit-appearance: none; 
+            appearance: none; 
+            width: 100%; /* 填满容器剩余宽度 */
+            height: 4px; 
+            background: rgba(255, 255, 255, 0.2); 
+            border-radius: 2px; 
+            outline: none; 
+            cursor: pointer;
+            /* 添加一个背景填充效果 (可选) */
+            background-image: linear-gradient(to right, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.6));
+            background-size: 100% 100%; /* 初始填充整个背景 */
+            background-repeat: no-repeat;
+        }
+        /* 音量滑块 Thumb 样式 - WebKit */
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none; 
+            appearance: none;
+            width: 12px; /* 比进度条滑块小一点 */
+            height: 12px; 
+            background: rgba(255, 255, 255, 0.9); 
+            border-radius: 50%; 
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            cursor: pointer;
+            margin-top: -4px; /* 垂直居中 (12-4)/2*-1 = -4 */
+        }
+        /* 音量滑块悬停/按下 (可选) */
+        .volume-slider:hover::-webkit-slider-thumb {
+            background: white;
         }
         #audio-player { 
             display: none !important; /* 强制隐藏 */
@@ -471,14 +544,23 @@
                     </div>
                     <!-- 时间显示 -->
                     <span class="time-display total-time">0:00</span>
-                    <!-- 进度条容器 (暂时留空，下一步添加) -->
+                    <!-- 进度条容器 -->
                     <div class="progress-bar-container">
-                        <!-- <input type="range" id="progress-bar" value="0" step="0.1"> -->
+                        <input type="range" id="progress-bar" class="progress-bar" value="0" step="0.1" min="0"> 
                     </div>
                     <!-- 音量控制容器 (暂时留空，更后面添加) -->
                     <div class="volume-control-container">
-                        <!-- ... -->
-                    </div>
+                        <!-- 音量按钮 (用于静音/取消静音) -->
+                        <button id="volume-btn" class="control-button" title="静音">
+                            <!-- 高音量图标 (初始) -->
+                            <svg class="volume-high-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></svg>
+                            <!-- 静音图标 (初始隐藏) -->
+                            <svg class="volume-muted-icon" style="display: none;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/></svg>
+                            <!-- 可以根据需要添加中/低音量图标 -->
+                        </button>
+                        <!-- 音量条 -->
+                        <input type="range" id="volume-slider" class="volume-slider" min="0" max="1" step="0.01" value="1">
+                            </div>
                 </div>
                 <!-- 自定义控件容器结束 -->
             </div>

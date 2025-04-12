@@ -15,12 +15,19 @@ const currentTimeSpan = document.querySelector('.current-time');
 const totalTimeSpan = document.querySelector('.total-time');
 const playIcon = playPauseBtn.querySelector('.play-icon');
 const pauseIcon = playPauseBtn.querySelector('.pause-icon');
+const progressBar = document.getElementById('progress-bar'); // 获取进度条 input
+const volumeBtn = document.getElementById('volume-btn');
+const volumeSlider = document.getElementById('volume-slider');
+const volumeHighIcon = volumeBtn.querySelector('.volume-high-icon');
+const volumeMutedIcon = volumeBtn.querySelector('.volume-muted-icon');
 
 // --- State ---
 let playlistData = []; // 存储播放列表数据 { filePath: string, metadata: object | null, displayTitle: string }
 let currentTrackIndex = -1; // 当前播放曲目的索引, -1 表示没有播放
 let draggedIndex = null; // 用于存储正在拖动的项目的索引
 let isHandlingError = false; // 添加一个标志位，防止错误处理重入
+let isSeeking = false; // 新增：标记用户是否正在拖动进度条
+let playNextTimeoutId = null; // 跟踪 setTimeout
 // let currentlyPlayingFilePath = null; // 用于在重新排序时跟踪当前播放歌曲
 
 // --- Helper Functions ---
@@ -142,6 +149,29 @@ function updatePlayPauseButton(isPlaying) {
         pauseIcon.style.display = 'none';
         playPauseBtn.title = '播放';
     }
+}
+
+// 更新音量图标和滑块填充
+function updateVolumeUI(volume, isMuted) {
+    // 更新图标
+    if (isMuted || volume === 0) {
+        volumeHighIcon.style.display = 'none';
+        volumeMutedIcon.style.display = 'inline-block';
+        volumeBtn.title = '取消静音';
+    } else {
+        volumeHighIcon.style.display = 'inline-block';
+        volumeMutedIcon.style.display = 'none';
+        volumeBtn.title = '静音';
+        // 可选：根据音量大小显示不同图标 (low, medium, high)
+        // if (volume < 0.1) { /* 显示静音图标 */ }
+        // else if (volume < 0.6) { /* 显示低音量图标 */ } 
+        // else { /* 显示高音量图标 */ }
+    }
+
+    // 更新滑块的值和背景填充
+    volumeSlider.value = isMuted ? 0 : volume; // 静音时滑块也归零
+    // 通过改变 background-size 的宽度百分比来模拟填充效果
+    volumeSlider.style.backgroundSize = `${volumeSlider.value * 100}% 100%`; 
 }
 
 // 播放指定索引的曲目 (修改以加载封面)
@@ -634,18 +664,20 @@ audioPlayer.addEventListener('pause', () => {
 audioPlayer.addEventListener('loadedmetadata', () => {
     console.log('[audioEvent] Loaded metadata.');
     totalTimeSpan.textContent = formatTime(audioPlayer.duration);
-    // 在这里设置进度条的最大值 (下一步实现)
-    // progressBar.max = audioPlayer.duration;
+    progressBar.max = audioPlayer.duration; // <-- 设置进度条最大值
+    progressBar.value = 0; // 确保新歌开始时进度条在开头
+    currentTimeSpan.textContent = formatTime(0); // 确保时间显示也重置
 });
 
 // 当播放时间更新时
 audioPlayer.addEventListener('timeupdate', () => {
-    // console.log('[audioEvent] Time update:', audioPlayer.currentTime); // 这个日志太频繁，通常注释掉
+    // console.log('[audioEvent] Time update:', audioPlayer.currentTime); 
     currentTimeSpan.textContent = formatTime(audioPlayer.currentTime);
-    // 在这里更新进度条的值 (下一步实现)
-    // if (!isSeeking) { // 防止用户拖动时冲突
-    //    progressBar.value = audioPlayer.currentTime;
-    // }
+    // --- 只有在用户没有拖动时才更新进度条 ---
+    if (!isSeeking) { 
+        progressBar.value = audioPlayer.currentTime;
+    }
+    // --- 更新结束 ---
 });
 
 // 当音频播放结束时 (除了播放下一首，也重置时间显示)
@@ -653,6 +685,7 @@ audioPlayer.addEventListener('ended', () => {
     // --- 添加非常详细的日志 ---
     console.log('------------------------------------'); // 分隔符
     console.log('[audioEnded] Event triggered.');
+    const endedTrackIndex = currentTrackIndex; // 捕获事件触发时的索引
     console.log(`[audioEnded] currentTrackIndex BEFORE processing: ${currentTrackIndex}`);
     console.log(`[audioEnded] playlistData.length: ${playlistData.length}`);
     // --- 日志结束 ---
@@ -660,6 +693,14 @@ audioPlayer.addEventListener('ended', () => {
     currentTimeSpan.textContent = formatTime(0); // 重置当前时间显示
     // totalTimeSpan.textContent = formatTime(0); // 总时长通常保留
     updatePlayPauseButton(false); // 确保按钮是播放状态
+
+    // --- 清理任何可能存在的旧 timeout ---
+    if (playNextTimeoutId) { // 假设你在 state 中定义了 let playNextTimeoutId = null;
+        clearTimeout(playNextTimeoutId);
+        console.log('[audioEnded] Cleared previous playNext timeout.');
+        playNextTimeoutId = null;
+    }
+    // --- 清理结束 ---
 
     // 检查索引有效性
     if (currentTrackIndex === -1 || playlistData.length === 0) { 
@@ -674,7 +715,10 @@ audioPlayer.addEventListener('ended', () => {
 
     console.log('[audioEnded] Condition (currentTrackIndex === -1 || playlistData.length === 0) is FALSE. Proceeding...'); // <-- 日志
 
-    const nextIndex = currentTrackIndex + 1;
+    progressBar.value = 0; // <-- 重置进度条值
+
+    // const nextIndex = currentTrackIndex + 1;
+    const nextIndex = currentTrackIndex
     console.log(`[audioEnded] Calculated nextIndex: ${nextIndex}`); // <-- 日志
 
     // 检查是否到达列表末尾
@@ -685,19 +729,93 @@ audioPlayer.addEventListener('ended', () => {
     } else {
         console.log('[audioEnded] Condition (nextIndex >= playlistData.length) is FALSE. Preparing to play next song.'); 
         
-        // --- 关键修改：清理状态并延迟播放下一首 ---
-        // console.log('[audioEnded] Clearing src before playing next.');
-        // audioPlayer.src = ''; // 先清空 src，确保完全停止上一个
-        
-        // 使用 setTimeout 给浏览器一点时间处理状态变化
-        setTimeout(() => {
-            console.log(`[audioEnded] setTimeout: Calling playTrack for index ${nextIndex}`);
-            playTrack(nextIndex);
-        }, 50); // 延迟 50 毫秒 (可以尝试调整这个值，0 可能也行，但 50 更稳妥)
-        // --- 修改结束 ---
+        // 使用 setTimeout 
+        playNextTimeoutId = setTimeout(() => { // 保存 timeout ID
+            // --- 在执行播放前再次检查状态 ---
+            if (currentTrackIndex === endedTrackIndex) { // 检查索引是否仍是刚结束那首歌的索引
+                console.log(`[audioEnded] setTimeout: State consistent (currentTrackIndex still ${endedTrackIndex}). Calling playTrack for index ${nextIndex}`);
+                playTrack(nextIndex);
+            } else {
+                console.warn(`[audioEnded] setTimeout: State changed during timeout (currentTrackIndex is now ${currentTrackIndex}, expected ${endedTrackIndex}). Aborting play next.`);
+            }
+            playNextTimeoutId = null; // 清除 ID
+            // --- 检查结束 ---
+        }, 50); 
+
+        // // 移除 setTimeout，直接播放下一首
+        // if (currentTrackIndex === endedTrackIndex) {
+        //     console.log(`[audioEnded] Immediately playing next index: ${nextIndex}`);
+        //     playTrack(nextIndex);
+        // }
     }
     console.log('------------------------------------'); // 分隔符
 });
+
+// --- Progress Bar Event Listeners ---
+
+// 当用户开始与进度条交互时 (按下鼠标或触摸开始)
+progressBar.addEventListener('input', () => {
+    if (!isSeeking) { // 第一次触发 input 时标记为正在拖动
+        console.log('[progressBar] Start seeking (input event).');
+        isSeeking = true;
+    }
+    // 可以在这里实时更新时间显示，但不更新音频 currentTime
+    currentTimeSpan.textContent = formatTime(progressBar.value); 
+});
+
+// 当用户完成交互时 (松开鼠标或触摸结束)
+progressBar.addEventListener('change', () => {
+    console.log(`[progressBar] Finish seeking (change event). Setting time to: ${progressBar.value}`);
+    audioPlayer.currentTime = progressBar.value; // 设置音频的播放时间
+    isSeeking = false; // 取消拖动标记
+    // 如果此时音频是暂停的，可能需要手动调用 play()
+    // if (audioPlayer.paused) {
+    //    audioPlayer.play().catch(handlePlaybackError);
+    // }
+});
+
+// 可选：处理鼠标松开事件，确保 isSeeking 被重置
+progressBar.addEventListener('mouseup', () => {
+    if (isSeeking) {
+        console.log('[progressBar] Mouse up during seeking.');
+        // change 事件通常会处理，但可以作为备用
+        // audioPlayer.currentTime = progressBar.value; 
+        // isSeeking = false;
+    }
+});
+ // 可选：处理触摸结束事件
+progressBar.addEventListener('touchend', () => {
+    if (isSeeking) {
+        console.log('[progressBar] Touch end during seeking.');
+        // change 事件通常会处理
+        // audioPlayer.currentTime = progressBar.value; 
+        // isSeeking = false;
+    }
+});
+
+// --- Volume Control Event Listeners ---
+
+// 当音量滑块的值改变时 (拖动中)
+volumeSlider.addEventListener('input', () => {
+    const newVolume = parseFloat(volumeSlider.value);
+    audioPlayer.volume = newVolume; // 直接设置音量
+    audioPlayer.muted = newVolume === 0; // 如果拖到0，则静音
+    console.log(`[volumeSlider] Volume changed to: ${newVolume}, Muted: ${audioPlayer.muted}`);
+    // 实时更新 UI (图标和填充)
+    updateVolumeUI(newVolume, audioPlayer.muted); 
+});
+
+// 点击音量按钮 (切换静音)
+volumeBtn.addEventListener('click', () => {
+    audioPlayer.muted = !audioPlayer.muted; // 切换静音状态
+    console.log(`[volumeBtn] Muted toggled to: ${audioPlayer.muted}`);
+    // 更新 UI (图标和填充) - 使用当前的实际音量（如果取消静音）
+    updateVolumeUI(audioPlayer.volume, audioPlayer.muted); 
+});
+
+// --- 初始化音量UI ---
+// 在脚本加载后，根据 audioPlayer 的初始状态设置一次 UI
+updateVolumeUI(audioPlayer.volume, audioPlayer.muted); 
 
 // 错误处理
 audioPlayer.addEventListener('error', (e) => {
