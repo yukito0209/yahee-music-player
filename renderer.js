@@ -667,17 +667,40 @@ audioPlayer.addEventListener('loadedmetadata', () => {
     progressBar.max = audioPlayer.duration; // <-- 设置进度条最大值
     progressBar.value = 0; // 确保新歌开始时进度条在开头
     currentTimeSpan.textContent = formatTime(0); // 确保时间显示也重置
+    // --- 重置填充 ---
+    // progressBar.style.backgroundSize = '0% 100%'; 
+    // --- 重置渐变背景 ---
+    progressBar.style.background = `linear-gradient(to right, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0.2) 0%)`;
 });
 
 // 当播放时间更新时
 audioPlayer.addEventListener('timeupdate', () => {
-    // console.log('[audioEvent] Time update:', audioPlayer.currentTime); 
     currentTimeSpan.textContent = formatTime(audioPlayer.currentTime);
-    // --- 只有在用户没有拖动时才更新进度条 ---
     if (!isSeeking) { 
-        progressBar.value = audioPlayer.currentTime;
+        const currentTime = audioPlayer.currentTime;
+        const duration = audioPlayer.duration;
+        let percentage = 0; // 默认百分比为 0
+
+        // --- 增加检查：确保 duration 是有效的数字 ---
+        if (duration && typeof duration === 'number' && duration > 0) {
+            percentage = (currentTime / duration) * 100;
+        } else {
+            // 如果 duration 无效（例如 NaN 或 0），则保持百分比为 0
+            console.warn(`[timeupdate] Invalid duration (${duration}) detected. Resetting percentage to 0.`);
+        }
+        // --- 检查结束 ---
+
+        progressBar.value = currentTime; // 更新滑块位置仍然需要
+
+        // --- 添加日志：打印计算出的百分比和将要设置的 backgroundSize ---
+        // const newBackgroundSize = `${percentage}% 100%`;
+        // console.log(`[timeupdate] currentTime: ${currentTime.toFixed(2)}, duration: ${duration}, percentage: ${percentage.toFixed(2)}%, Setting backgroundSize to: ${newBackgroundSize}`);
+        // --- 日志结束 ---
+
+        // --- 更新渐变背景 ---
+        progressBar.style.background = `linear-gradient(to right, rgba(255, 255, 255, 0.7) ${percentage}%, rgba(255, 255, 255, 0.2) ${percentage}%)`;
+        // --- 更新结束 ---
     }
-    // --- 更新结束 ---
 });
 
 // 当音频播放结束时 (除了播放下一首，也重置时间显示)
@@ -716,6 +739,8 @@ audioPlayer.addEventListener('ended', () => {
     console.log('[audioEnded] Condition (currentTrackIndex === -1 || playlistData.length === 0) is FALSE. Proceeding...'); // <-- 日志
 
     progressBar.value = 0; // <-- 重置进度条值
+    // --- 重置渐变背景 ---
+    progressBar.style.background = `linear-gradient(to right, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0.2) 0%)`;
 
     // const nextIndex = currentTrackIndex + 1;
     const nextIndex = currentTrackIndex
@@ -761,12 +786,19 @@ progressBar.addEventListener('input', () => {
     }
     // 可以在这里实时更新时间显示，但不更新音频 currentTime
     currentTimeSpan.textContent = formatTime(progressBar.value); 
+    // --- 实时更新填充 ---
+    const percentage = (progressBar.value / progressBar.max) * 100;
+    progressBar.style.background = `linear-gradient(to right, rgba(255, 255, 255, 0.7) ${percentage}%, rgba(255, 255, 255, 0.2) ${percentage}%)`;
 });
 
 // 当用户完成交互时 (松开鼠标或触摸结束)
 progressBar.addEventListener('change', () => {
     console.log(`[progressBar] Finish seeking (change event). Setting time to: ${progressBar.value}`);
     audioPlayer.currentTime = progressBar.value; // 设置音频的播放时间
+    // --- 确保渐变与最终值一致 ---
+    const percentage = (progressBar.value / progressBar.max) * 100;
+    progressBar.style.background = `linear-gradient(to right, rgba(255, 255, 255, 0.7) ${percentage}%, rgba(255, 255, 255, 0.2) ${percentage}%)`;
+    // --- 更新结束 ---
     isSeeking = false; // 取消拖动标记
     // 如果此时音频是暂停的，可能需要手动调用 play()
     // if (audioPlayer.paused) {

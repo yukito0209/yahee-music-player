@@ -364,15 +364,29 @@
         }
         /* --- 新增：进度条 input 样式 --- */
         .progress-bar {
-            -webkit-appearance: none; /* 移除 WebKit 的默认外观 */
-            appearance: none; /* 移除标准浏览器默认外观 */
-            width: 100%; /* 宽度填满容器 */
-            height: 4px; /* 轨道高度 */
-            background: rgba(255, 255, 255, 0.2); /* 轨道背景色 */
-            border-radius: 2px; /* 轨道圆角 */
-            outline: none; /* 移除焦点时的轮廓 */
+            -webkit-appearance: none; 
+            appearance: none; 
+            width: 100%; 
+            height: 4px; 
+            /* 将背景设置在这里，并用渐变模拟填充 */
+            background: linear-gradient(to right, 
+                rgba(255, 255, 255, 0.7) 0%, /* 填充颜色，初始填充 0% */
+                rgba(255, 255, 255, 0.2) 0%  /* 未填充颜色，从 0% 开始 */
+            );
+            border-radius: 2px; 
+            outline: none; 
             cursor: pointer;
-            transition: background 0.2s ease; /* 可选：添加过渡 */
+            /* 移除 background-image */
+            /* background-image: none; */ 
+        }
+        /* 进度条轨道 (Track) 样式 - WebKit */
+        .progress-bar::-webkit-slider-runnable-track {
+            /* 不再需要在这里设置背景或填充 */
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: transparent; /* 可以设为透明 */
+            border-radius: 2px; 
         }
         /* 进度条滑块 (Thumb) 样式 - WebKit */
         .progress-bar::-webkit-slider-thumb {
