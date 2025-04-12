@@ -54,6 +54,6 @@ YAHEE MUSIC 的第一个版本！这是一款基于 Electron 构建的、注重�
 感谢你的尝试和使用！欢迎通过 [Issues](https://github.com/yukito0209/yahee-music-player/issues) 提出反馈和建议。
 
 ---
-**界面展示**
+**界面展示 v1.0.0**
 
 ![image](https://github.com/user-attachments/assets/b85b062e-7de8-45df-94a0-753a62602162)
