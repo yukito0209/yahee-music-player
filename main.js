@@ -1,5 +1,5 @@
 // main.js
-const { app, BrowserWindow, ipcMain, dialog, Menu } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, Menu, shell } = require('electron');
 const path = require('path');
 const mm = require('music-metadata');
 const util = require('util'); 
@@ -11,6 +11,10 @@ const createWindow = () => {
         height: 720,
         // --- 添加 icon 属性 ---
         icon: path.join(__dirname, 'assets/icon.png'), // <-- 指向你的图标文件路径
+        // --- 添加无边框窗口配置 ---
+        frame: false, // 设置为 false 以创建无边框窗口
+        transparent: true, // 允许窗口透明
+        show: false, // <-- 添加：初始隐藏窗口
         webPreferences: {
             // __dirname 指向当前文件的路径
             // path.join 用于拼接路径
@@ -24,6 +28,13 @@ const createWindow = () => {
 
     // 加载 index.html 文件
     mainWindow.loadFile('index.html');
+
+    // --- 新增：监听 ready-to-show 事件 ---
+    mainWindow.once('ready-to-show', () => {
+        console.log('[mainWindow] Ready to show. Showing window now.');
+        mainWindow.show(); // 在窗口准备好后显示
+    });
+    // --- 监听结束 ---
 
     // --- 添加这行来移除菜单栏 ---
     Menu.setApplicationMenu(null); // 设置应用程序菜单为 null 即可隐藏
@@ -199,5 +210,36 @@ ipcMain.handle('get-album-art', async (event, filePath) => {
     } catch (error) {
         console.error(`[ipcMain] Error parsing file for album art: ${filePath}`, error);
         return null;
+    }
+});
+
+// --- 新增：窗口控制事件处理 ---
+ipcMain.on('window:minimize', (event) => {
+    const window = BrowserWindow.fromWebContents(event.sender);
+    window.minimize();
+});
+
+ipcMain.on('window:maximize', (event) => {
+    const window = BrowserWindow.fromWebContents(event.sender);
+    if (window.isMaximized()) {
+        window.unmaximize();
+    } else {
+        window.maximize();
+    }
+});
+
+ipcMain.on('window:close', (event) => {
+    const window = BrowserWindow.fromWebContents(event.sender);
+    window.close();
+});
+
+// --- 新增：处理打开外部链接的请求 ---
+ipcMain.on('open-external-link', (event, url) => {
+    // 安全检查：确保 URL 是 http 或 https 协议
+    if (url && (url.startsWith('http://') || url.startsWith('https://'))) {
+        console.log(`[ipcMain] Opening external link: ${url}`);
+        shell.openExternal(url);
+    } else {
+        console.warn(`[ipcMain] Attempted to open invalid external link: ${url}`);
     }
 });

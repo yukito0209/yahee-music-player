@@ -20,6 +20,13 @@ const volumeBtn = document.getElementById('volume-btn');
 const volumeSlider = document.getElementById('volume-slider');
 const volumeHighIcon = volumeBtn.querySelector('.volume-high-icon');
 const volumeMutedIcon = volumeBtn.querySelector('.volume-muted-icon');
+const githubLinkBtn = document.getElementById('github-link-btn'); // <-- 获取 GitHub 链接按钮
+const modeBtn = document.getElementById('mode-btn'); // <-- 获取模式按钮
+const modeIcons = { // <-- 获取所有模式图标
+    listLoop: modeBtn.querySelector('.mode-list-loop'),
+    singleLoop: modeBtn.querySelector('.mode-single-loop'),
+    random: modeBtn.querySelector('.mode-random'),
+};
 
 // --- State ---
 let playlistData = []; // 存储播放列表数据 { filePath: string, metadata: object | null, displayTitle: string }
@@ -29,6 +36,15 @@ let isHandlingError = false; // 添加一个标志位，防止错误处理重入
 let isSeeking = false; // 新增：标记用户是否正在拖动进度条
 let playNextTimeoutId = null; // 跟踪 setTimeout
 // let currentlyPlayingFilePath = null; // 用于在重新排序时跟踪当前播放歌曲
+
+// --- 新增：播放模式常量和状态 ---
+const PLAY_MODES = {
+    LIST_LOOP: 'LIST_LOOP',
+    SINGLE_LOOP: 'SINGLE_LOOP',
+    RANDOM: 'RANDOM',
+};
+const PLAY_MODE_ORDER = [PLAY_MODES.LIST_LOOP, PLAY_MODES.SINGLE_LOOP, PLAY_MODES.RANDOM]; // 模式切换顺序
+let currentPlayMode = PLAY_MODES.LIST_LOOP; // 默认列表循环
 
 // --- Helper Functions ---
 
@@ -78,7 +94,7 @@ function updatePlaylistUI(currentPlayingPath = null) {
     if (playlistData.length === 0) {
         console.log('[updatePlaylistUI] Playlist is empty. Displaying prompt.');
         const emptyLi = document.createElement('li');
-        emptyLi.textContent = '将音乐文件拖放到这里或点击“添加”';
+        emptyLi.textContent = '将音乐文件拖放到这里或点击"添加"';
         emptyLi.style.textAlign = 'center';
         // emptyLi.style.color = '#888';
         emptyLi.style.cursor = 'default'; 
@@ -178,21 +194,15 @@ function updateVolumeUI(volume, isMuted) {
 async function playTrack(index) {
     console.log(`[playTrack] Attempting to play index: ${index}`);
     if (index < 0 || index >= playlistData.length) {
-        console.warn('[playTrack] Invalid track index or playlist empty. Stopping playback.');
-        stopPlayback(); 
-        trackInfoDiv.textContent = '播放列表为空或索引无效';
+        console.warn(`[playTrack] Received invalid index ${index} after potential mode calculation. Stopping playback.`);
+        stopPlayback();
         return;
     }
 
-    // 检查是否点击了当前已在播放的歌曲
-    if (index === currentTrackIndex && !audioPlayer.paused) {
-        console.log(`[playTrack] Track at index ${index} is already playing.`);
-         // 可选：实现点击已播放歌曲暂停/重新播放的逻辑
-         // audioPlayer.pause(); 
-         return; // 或者根据需要决定是否重新加载
-    }
+    // 检查是否点击了当前已在播放的歌曲 (这个逻辑可能需要根据模式调整，暂时保留)
+    // if (index === currentTrackIndex && !audioPlayer.paused) { ... }
 
-    currentTrackIndex = index; 
+    currentTrackIndex = index; // 确认更新当前索引
     const trackToPlay = playlistData[currentTrackIndex];
     console.log(`[playTrack] File path to play: ${trackToPlay.filePath}`); // <-- 添加日志
     console.log(`[playTrack] Display title: ${trackToPlay.displayTitle}`); // <-- 添加日志
@@ -534,34 +544,82 @@ togglePlaylistBtn.addEventListener('click', () => {
     }
 });
 
-// 音频播放结束事件 - 自动播放下一首
+// 模式切换按钮点击事件
+modeBtn.addEventListener('click', () => {
+    const currentIndex = PLAY_MODE_ORDER.indexOf(currentPlayMode);
+    const nextIndex = (currentIndex + 1) % PLAY_MODE_ORDER.length;
+    currentPlayMode = PLAY_MODE_ORDER[nextIndex];
+    console.log(`[modeBtn] Clicked. New mode: ${currentPlayMode}`);
+    updateModeButtonUI();
+    // 可选：如果切换到随机播放，可以考虑立即跳到下一首随机歌曲
+    // if (currentPlayMode === PLAY_MODES.RANDOM && !audioPlayer.paused) {
+    //     const nextIndex = getNextTrackIndex();
+    //     playTrack(nextIndex);
+    // }
+});
+
+// 音频播放结束事件 - 根据模式处理
 audioPlayer.addEventListener('ended', () => {
-    console.log('Track ended. Playing next.');
-    currentTimeSpan.textContent = formatTime(0); 
-    updatePlayPauseButton(false); 
+    // --- 添加非常详细的日志 ---
+    console.log('------------------------------------');
+    console.log(`[audioEnded] Event triggered. Current mode: ${currentPlayMode}`);
+    const endedTrackIndex = currentTrackIndex;
+    console.log(`[audioEnded] currentTrackIndex BEFORE processing: ${currentTrackIndex}`);
+    console.log(`[audioEnded] playlistData.length: ${playlistData.length}`);
+    // --- 日志结束 ---
 
-    // --- 增加检查 ---
-    if (currentTrackIndex === -1 || playlistData.length === 0) { 
+    currentTimeSpan.textContent = formatTime(0);
+    updatePlayPauseButton(false);
+    progressBar.value = 0;
+    progressBar.style.background = `linear-gradient(to right, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0.2) 0%)`;
+
+    // --- 清理任何可能存在的旧 timeout ---
+    if (playNextTimeoutId) {
+        clearTimeout(playNextTimeoutId);
+        console.log('[audioEnded] Cleared previous playNext timeout.');
+        playNextTimeoutId = null;
+    }
+    // --- 清理结束 ---
+
+    if (currentTrackIndex === -1 || playlistData.length === 0) {
         console.log('[audioEnded] No valid current track or empty playlist, stopping.');
-        // 确保完全停止，以防万一 stopPlayback 没完全清理干净
-        if (!audioPlayer.paused) audioPlayer.pause();
-        if (audioPlayer.src) audioPlayer.src = '';
-        currentTrackIndex = -1; // 再次确认索引
-        updatePlaylistUI(); // 更新高亮（应该没有高亮了）
-        return; 
+        stopPlayback(); // 确保停止
+        console.log('------------------------------------');
+        return;
     }
-    // --- 检查结束 --
 
-    const nextIndex = currentTrackIndex + 1;
-    if (nextIndex >= playlistData.length) {
-        console.log('End of playlist reached.');
-        stopPlayback(); // 播放完毕停止
-        trackInfoDiv.textContent = '播放列表已结束';
-        // updatePlaylistUI(); // 更新 UI 移除高亮
-        // playTrack(0); // 循环播放
-    } else {
-        playTrack(nextIndex);
+    // --- 处理播放模式 --- 
+    if (currentPlayMode === PLAY_MODES.SINGLE_LOOP) {
+        console.log('[audioEnded] Single loop mode. Replaying current track.');
+        // 直接重播当前歌曲
+        audioPlayer.currentTime = 0; // 重置播放时间
+        audioPlayer.play().catch(handlePlaybackError);
+        updatePlayPauseButton(true); // 确保按钮是暂停状态
+        console.log('------------------------------------');
+        return; // 单曲循环处理完毕
     }
+
+    const nextIndex = getNextTrackIndex(); // 使用新函数获取下一首索引
+    console.log(`[audioEnded] Calculated nextIndex based on mode ${currentPlayMode}: ${nextIndex}`);
+
+    if (nextIndex === -1) { // getNextTrackIndex 可能返回 -1 表示列表结束或无需播放
+        console.log('[audioEnded] getNextTrackIndex returned -1. End of playlist (likely). Stopping playback.');
+        stopPlayback();
+        trackInfoDiv.textContent = '播放列表已结束';
+    } else {
+        console.log('[audioEnded] Preparing to play next song index: ', nextIndex);
+        playNextTimeoutId = setTimeout(() => {
+            // 再次检查状态，确保在延迟期间没有发生改变
+            if (currentTrackIndex === endedTrackIndex) { 
+                console.log(`[audioEnded] setTimeout: State consistent. Calling playTrack for index ${nextIndex}`);
+                playTrack(nextIndex);
+            } else {
+                console.warn(`[audioEnded] setTimeout: State changed during timeout (currentTrackIndex is now ${currentTrackIndex}, expected ${endedTrackIndex}). Aborting play next.`);
+            }
+            playNextTimeoutId = null;
+        }, 50); 
+    }
+    console.log('------------------------------------');
 });
 
 // 辅助函数处理播放错误后的逻辑 (修改版)
@@ -627,10 +685,19 @@ playPauseBtn.addEventListener('click', () => {
 // 上一首按钮点击事件
 prevBtn.addEventListener('click', () => {
     console.log('[prevBtn] Clicked.');
-    if (playlistData.length === 0) return; // 列表为空则不操作
-    let prevIndex = currentTrackIndex - 1;
-    if (prevIndex < 0) {
-        prevIndex = playlistData.length - 1; // 循环到最后一首
+    if (playlistData.length === 0) return;
+    let prevIndex;
+    if (currentPlayMode === PLAY_MODES.RANDOM) {
+        // 随机模式下，"上一首"也播放随机歌曲（简单处理）
+        prevIndex = getNextTrackIndex();
+        console.log(`[prevBtn] Random mode, getting next random index: ${prevIndex}`);
+    } else {
+        // 列表循环或单曲循环模式下，行为一致
+        prevIndex = currentTrackIndex - 1;
+        if (prevIndex < 0) {
+            prevIndex = playlistData.length - 1; // 循环到最后一首
+        }
+        console.log(`[prevBtn] Loop mode, calculated prev index: ${prevIndex}`);
     }
     playTrack(prevIndex);
 });
@@ -638,12 +705,17 @@ prevBtn.addEventListener('click', () => {
 // 下一首按钮点击事件
 nextBtn.addEventListener('click', () => {
     console.log('[nextBtn] Clicked.');
-    if (playlistData.length === 0) return; // 列表为空则不操作
-    let nextIndex = currentTrackIndex + 1;
-    if (nextIndex >= playlistData.length) {
-        nextIndex = 0; // 循环到第一首
+    if (playlistData.length === 0) return;
+    const nextIndex = getNextTrackIndex(); // 直接使用新函数
+    console.log(`[nextBtn] Calculated next index based on mode ${currentPlayMode}: ${nextIndex}`);
+    if (nextIndex !== -1) { // 确保索引有效
+        playTrack(nextIndex);
+    } else {
+        // 如果 nextIndex 是 -1 (可能发生在特殊情况或未来更复杂的模式)
+        console.warn('[nextBtn] getNextTrackIndex returned -1. Stopping or staying put.');
+        // 可以选择停止，或者什么都不做
+        // stopPlayback(); 
     }
-    playTrack(nextIndex);
 });
 
 // --- Audio Element Event Listeners ---
@@ -701,79 +773,6 @@ audioPlayer.addEventListener('timeupdate', () => {
         progressBar.style.background = `linear-gradient(to right, rgba(255, 255, 255, 0.7) ${percentage}%, rgba(255, 255, 255, 0.2) ${percentage}%)`;
         // --- 更新结束 ---
     }
-});
-
-// 当音频播放结束时 (除了播放下一首，也重置时间显示)
-audioPlayer.addEventListener('ended', () => {
-    // --- 添加非常详细的日志 ---
-    console.log('------------------------------------'); // 分隔符
-    console.log('[audioEnded] Event triggered.');
-    const endedTrackIndex = currentTrackIndex; // 捕获事件触发时的索引
-    console.log(`[audioEnded] currentTrackIndex BEFORE processing: ${currentTrackIndex}`);
-    console.log(`[audioEnded] playlistData.length: ${playlistData.length}`);
-    // --- 日志结束 ---
-
-    currentTimeSpan.textContent = formatTime(0); // 重置当前时间显示
-    // totalTimeSpan.textContent = formatTime(0); // 总时长通常保留
-    updatePlayPauseButton(false); // 确保按钮是播放状态
-
-    // --- 清理任何可能存在的旧 timeout ---
-    if (playNextTimeoutId) { // 假设你在 state 中定义了 let playNextTimeoutId = null;
-        clearTimeout(playNextTimeoutId);
-        console.log('[audioEnded] Cleared previous playNext timeout.');
-        playNextTimeoutId = null;
-    }
-    // --- 清理结束 ---
-
-    // 检查索引有效性
-    if (currentTrackIndex === -1 || playlistData.length === 0) { 
-        console.log('[audioEnded] Condition (currentTrackIndex === -1 || playlistData.length === 0) is TRUE. Stopping.'); // <-- 日志
-        if (!audioPlayer.paused) audioPlayer.pause();
-        if (audioPlayer.src) audioPlayer.src = '';
-        currentTrackIndex = -1; 
-        updatePlaylistUI(); 
-        console.log('------------------------------------'); // 分隔符
-        return; 
-    }
-
-    console.log('[audioEnded] Condition (currentTrackIndex === -1 || playlistData.length === 0) is FALSE. Proceeding...'); // <-- 日志
-
-    progressBar.value = 0; // <-- 重置进度条值
-    // --- 重置渐变背景 ---
-    progressBar.style.background = `linear-gradient(to right, rgba(255, 255, 255, 0.7) 0%, rgba(255, 255, 255, 0.2) 0%)`;
-
-    // const nextIndex = currentTrackIndex + 1;
-    const nextIndex = currentTrackIndex
-    console.log(`[audioEnded] Calculated nextIndex: ${nextIndex}`); // <-- 日志
-
-    // 检查是否到达列表末尾
-    if (nextIndex >= playlistData.length) {
-        console.log('[audioEnded] Condition (nextIndex >= playlistData.length) is TRUE. End of playlist reached.'); // <-- 日志
-        stopPlayback(); 
-        trackInfoDiv.textContent = '播放列表已结束';
-    } else {
-        console.log('[audioEnded] Condition (nextIndex >= playlistData.length) is FALSE. Preparing to play next song.'); 
-        
-        // 使用 setTimeout 
-        playNextTimeoutId = setTimeout(() => { // 保存 timeout ID
-            // --- 在执行播放前再次检查状态 ---
-            if (currentTrackIndex === endedTrackIndex) { // 检查索引是否仍是刚结束那首歌的索引
-                console.log(`[audioEnded] setTimeout: State consistent (currentTrackIndex still ${endedTrackIndex}). Calling playTrack for index ${nextIndex}`);
-                playTrack(nextIndex);
-            } else {
-                console.warn(`[audioEnded] setTimeout: State changed during timeout (currentTrackIndex is now ${currentTrackIndex}, expected ${endedTrackIndex}). Aborting play next.`);
-            }
-            playNextTimeoutId = null; // 清除 ID
-            // --- 检查结束 ---
-        }, 50); 
-
-        // // 移除 setTimeout，直接播放下一首
-        // if (currentTrackIndex === endedTrackIndex) {
-        //     console.log(`[audioEnded] Immediately playing next index: ${nextIndex}`);
-        //     playTrack(nextIndex);
-        // }
-    }
-    console.log('------------------------------------'); // 分隔符
 });
 
 // --- Progress Bar Event Listeners ---
@@ -868,8 +867,84 @@ audioPlayer.addEventListener('error', (e) => {
     handlePlaybackError();
 });
 
+// --- 新增：更新播放模式按钮 UI ---
+function updateModeButtonUI() {
+    // 先隐藏所有图标
+    Object.values(modeIcons).forEach(icon => icon.style.display = 'none');
+
+    let title = '切换播放模式';
+    switch (currentPlayMode) {
+        case PLAY_MODES.SINGLE_LOOP:
+            modeIcons.singleLoop.style.display = 'inline-block';
+            title = '切换播放模式：单曲循环';
+            break;
+        case PLAY_MODES.RANDOM:
+            modeIcons.random.style.display = 'inline-block';
+            title = '切换播放模式：随机播放';
+            break;
+        case PLAY_MODES.LIST_LOOP:
+        default:
+            modeIcons.listLoop.style.display = 'inline-block';
+            title = '切换播放模式：列表循环';
+            break;
+    }
+    modeBtn.title = title;
+    console.log(`[updateModeButtonUI] Mode set to: ${currentPlayMode}, Title: "${title}"`);
+}
+
+// --- 新增：根据模式获取下一首歌曲索引 ---
+function getNextTrackIndex() {
+    if (playlistData.length === 0) {
+        return -1; // 列表为空
+    }
+    if (playlistData.length === 1) {
+        // 只有一首歌时，所有模式都表现为单曲循环或停止（取决于单曲循环本身逻辑）
+        return (currentPlayMode === PLAY_MODES.SINGLE_LOOP || currentPlayMode === PLAY_MODES.LIST_LOOP) ? 0 : -1;
+    }
+
+    switch (currentPlayMode) {
+        case PLAY_MODES.RANDOM:
+            // 随机播放：选择一个与当前不同的随机索引
+            let randomIndex;
+            do {
+                randomIndex = Math.floor(Math.random() * playlistData.length);
+            } while (randomIndex === currentTrackIndex && playlistData.length > 1); // 确保不连续播放同一首（除非只有一首歌）
+            return randomIndex;
+        case PLAY_MODES.SINGLE_LOOP:
+            // 单曲循环：返回当前索引，由 'ended' 事件处理重播
+            return currentTrackIndex;
+        case PLAY_MODES.LIST_LOOP:
+        default:
+            // 列表循环
+            let nextIndex = currentTrackIndex + 1;
+            return nextIndex >= playlistData.length ? 0 : nextIndex; // 到末尾则循环回开头
+    }
+}
+
 // --- Initial Load ---
 // 应用启动时可以尝试加载上次的播放列表（如果实现了持久化）
 // 目前启动时列表为空
 console.log('[Initial Load] Calling updatePlaylistUI.');
 updatePlaylistUI();
+updateModeButtonUI(); // <-- 新增：初始化模式按钮 UI
+
+// --- 窗口控制按钮事件监听 ---
+document.getElementById('minimize-btn').addEventListener('click', () => {
+    window.electronAPI.minimizeWindow();
+});
+
+document.getElementById('maximize-btn').addEventListener('click', () => {
+    window.electronAPI.maximizeWindow();
+});
+
+document.getElementById('close-btn').addEventListener('click', () => {
+    window.electronAPI.closeWindow();
+});
+
+// --- GitHub 链接点击事件 --- (放到合适的位置，例如其他事件监听器附近)
+githubLinkBtn.addEventListener('click', (event) => {
+    event.preventDefault(); // 阻止默认的链接跳转行为
+    const url = githubLinkBtn.href; // 获取链接地址
+    console.log(`[githubLinkBtn] Clicked. Requesting to open external link: ${url}`);
+    window.electronAPI.openExternalLink(url); // 请求主进程打开链接
+});
