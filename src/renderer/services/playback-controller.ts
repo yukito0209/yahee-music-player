@@ -22,8 +22,6 @@ export class PlaybackController {
    * 播放指定索引的曲目
    */
   async playTrackAtIndex(index: number): Promise<void> {
-    console.log(`[PlaybackController] Playing track at index: ${index}`);
-    
     if (index < 0 || index >= this.playlistManager.getLength()) {
       console.warn(`[PlaybackController] Invalid index ${index}`);
       this.audioController.stop();
@@ -39,7 +37,6 @@ export class PlaybackController {
     try {
       await this.audioController.playTrack(track);
       this.playlistManager.setCurrentTrackIndex(index);
-      console.log(`[PlaybackController] Successfully playing: ${track.displayTitle}`);
     } catch (error) {
       console.error('[PlaybackController] Failed to play track:', error);
     }

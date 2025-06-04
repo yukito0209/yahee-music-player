@@ -16,37 +16,12 @@ if (document.readyState === 'loading') {
  * 初始化应用
  */
 function initializeApp(): void {
-  console.log('[Main] Initializing YAHEE MUSIC application...');
-  
-  // --- 检查 electronAPI 是否可用 ---
-  console.log('[Main] Checking electronAPI:', typeof (window as any).electronAPI);
-  console.log('[Main] electronAPI object:', (window as any).electronAPI);
-  
-  // --- 添加调试：测试基本DOM交互 ---
-  document.addEventListener('click', (event) => {
-    console.log('[Debug] Document click detected:', event.target);
-  });
-  
-  // 测试简单按钮点击
-  setTimeout(() => {
-    const testButtons = document.querySelectorAll('button');
-    console.log('[Debug] Found buttons:', testButtons.length);
-    testButtons.forEach((btn, index) => {
-      console.log(`[Debug] Button ${index}:`, btn.id, btn.className);
-    });
-  }, 1000);
-  
   try {
     // 创建应用实例
     const app = new YaheeMusicApp();
     
     // 初始化应用
     app.initialize();
-    
-    // 在全局作用域保存应用实例，便于调试
-    (window as any).yaheeMusicApp = app;
-    
-    console.log('[Main] YAHEE MUSIC application started successfully');
     
     // 处理未捕获的错误
     window.addEventListener('error', (event) => {

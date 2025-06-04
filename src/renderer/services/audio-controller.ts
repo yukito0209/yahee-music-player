@@ -32,8 +32,6 @@ export class AudioController {
    * 播放指定曲目
    */
   async playTrack(track: PlaylistItem): Promise<void> {
-    console.log(`[AudioController] Playing track: ${track.displayTitle}`);
-    
     this.currentTrack = track;
     this.dom.audioPlayer.src = track.filePath;
     
@@ -111,13 +109,8 @@ export class AudioController {
    * 设置播放位置
    */
   setCurrentTime(time: number): void {
-    console.log('[AudioController] Setting current time to:', time);
-    console.log('[AudioController] Audio duration:', this.dom.audioPlayer.duration);
-    console.log('[AudioController] Audio src:', this.dom.audioPlayer.src);
-    
     if (isFinite(time) && time >= 0) {
       const clampedTime = Math.min(time, this.dom.audioPlayer.duration || 0);
-      console.log('[AudioController] Clamped time:', clampedTime);
       this.dom.audioPlayer.currentTime = clampedTime;
     }
   }

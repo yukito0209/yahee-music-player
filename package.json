@@ -30,12 +30,15 @@
     "@types/node": "^20.17.57",
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
+    "concurrently": "^9.1.2",
     "electron": "^35.1.5",
     "electron-builder": "^26.0.12",
+    "electron-reload": "^2.0.0-alpha.1",
     "esbuild": "^0.25.5",
     "eslint": "^8.57.1",
     "jest": "^29.7.0",
     "prettier": "^3.5.3",
+    "rimraf": "^6.0.1",
     "typescript": "^5.8.3"
   },
   "dependencies": {

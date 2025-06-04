@@ -29,17 +29,10 @@ export class YaheeMusicApp {
    * 初始化应用
    */
   initialize(): void {
-    console.log('[YaheeMusicApp] Initializing application...');
-    
     try {
       this.registerEventListeners();
       this.registerKeyboardShortcuts();
       this.initializeFileDrop();
-      
-      // 初始化UI控制器（确保窗口控制、外部链接等功能正常）
-      console.log('[YaheeMusicApp] UI controller initialized during app initialization');
-      
-      console.log('[YaheeMusicApp] Application initialized successfully');
     } catch (error) {
       console.error('[YaheeMusicApp] Failed to initialize application:', error);
       this.uiController.showError('应用初始化失败');
@@ -89,7 +82,6 @@ export class YaheeMusicApp {
    * 处理播放列表项点击
    */
   private async handleTrackClick(index: number): Promise<void> {
-    console.log(`[YaheeMusicApp] Track clicked: ${index}`);
     await this.playbackController.playTrackAtIndex(index);
   }
 
@@ -162,8 +154,7 @@ export class YaheeMusicApp {
    * 处理播放模式切换
    */
   private handleModeToggle(): void {
-    const newMode = this.audioController.togglePlayMode();
-    console.log(`[YaheeMusicApp] Play mode changed to: ${newMode}`);
+    this.audioController.togglePlayMode();
   }
 
   /**
@@ -243,7 +234,6 @@ export class YaheeMusicApp {
    * 清理资源
    */
   destroy(): void {
-    console.log('[YaheeMusicApp] Destroying application...');
     this.playbackController.stopPlayback();
     // 这里可以添加其他清理逻辑
   }

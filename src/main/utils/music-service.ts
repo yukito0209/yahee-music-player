@@ -12,11 +12,8 @@ export class MusicService {
    * 解析单个音频文件的元数据
    */
   async parseAudioFile(filePath: string): Promise<FileData> {
-    console.log(`[MusicService] Processing filePath: ${filePath}`);
-    
     try {
       const metadata = await mm.parseFile(filePath);
-      console.log(`[MusicService] Metadata parsed for: ${path.basename(filePath)}`);
       
       return {
         filePath: filePath,
@@ -103,23 +100,17 @@ export class MusicService {
    * 处理图片数据，确保转换为Buffer
    */
   private processPictureData(pictureData: any): Buffer | null {
-    console.log(`[MusicService] Type of picture.data: ${typeof pictureData}`);
-    console.log(`[MusicService] Is picture.data a Buffer? ${Buffer.isBuffer(pictureData)}`);
-    
     if (!pictureData) {
-      console.warn('[MusicService] picture.data is missing!');
       return null;
     }
 
     // 如果已经是Buffer
     if (Buffer.isBuffer(pictureData)) {
-      console.log('[MusicService] picture.data is already a Buffer.');
       return pictureData;
     }
 
     // 如果是Uint8Array
     if (pictureData instanceof Uint8Array) {
-      console.log('[MusicService] picture.data is a Uint8Array. Converting to Buffer.');
       try {
         return Buffer.from(pictureData);
       } catch (conversionError) {
