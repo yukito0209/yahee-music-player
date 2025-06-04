@@ -21,6 +21,7 @@ export class IpcHandlers {
   registerAllHandlers(): void {
     this.registerFileDialogHandler();
     this.registerAlbumArtHandler();
+    this.registerFileSizeHandler();
     this.registerWindowHandlers();
     this.registerExternalLinkHandler();
   }
@@ -69,6 +70,20 @@ export class IpcHandlers {
   }
 
   /**
+   * 注册文件大小处理器
+   */
+  private registerFileSizeHandler(): void {
+    ipcMain.handle(IPC_CHANNELS.GET_FILE_SIZE, async (event, filePath: string) => {
+      try {
+        return await this.musicService.getFileSize(filePath);
+      } catch (error) {
+        console.error('[IpcHandlers] Error getting file size:', error);
+        return null;
+      }
+    });
+  }
+
+  /**
    * 注册窗口控制处理器
    */
   private registerWindowHandlers(): void {
@@ -109,6 +124,7 @@ export class IpcHandlers {
   removeAllHandlers(): void {
     ipcMain.removeAllListeners(IPC_CHANNELS.DIALOG_OPEN_FILE);
     ipcMain.removeAllListeners(IPC_CHANNELS.GET_ALBUM_ART);
+    ipcMain.removeAllListeners(IPC_CHANNELS.GET_FILE_SIZE);
     ipcMain.removeAllListeners(IPC_CHANNELS.WINDOW_MINIMIZE);
     ipcMain.removeAllListeners(IPC_CHANNELS.WINDOW_MAXIMIZE);
     ipcMain.removeAllListeners(IPC_CHANNELS.WINDOW_CLOSE);

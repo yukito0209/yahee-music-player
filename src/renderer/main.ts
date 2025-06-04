@@ -1,4 +1,5 @@
 import { YaheeMusicApp } from './app';
+import { ToastNotification } from './utils/toast-notification';
 
 /**
  * 渲染进程入口文件
@@ -76,5 +77,30 @@ if (process.env.NODE_ENV === 'development') {
         console.log('[Debug] Current app state:', app.getAppState());
       }
     }
+    
+    // Toast测试快捷键
+    if (event.ctrlKey && event.shiftKey && event.key === 'T') {
+      event.preventDefault();
+      testToastNotifications();
+    }
   });
+}
+
+/**
+ * 测试Toast通知系统
+ */
+function testToastNotifications(): void {
+  ToastNotification.success('这是一个成功通知！', { duration: 3000 });
+  
+  setTimeout(() => {
+    ToastNotification.info('这是一个信息通知', { duration: 3000 });
+  }, 500);
+  
+  setTimeout(() => {
+    ToastNotification.warning('这是一个警告通知', { duration: 3000 });
+  }, 1000);
+  
+  setTimeout(() => {
+    ToastNotification.error('这是一个错误通知', { duration: 4000 });
+  }, 1500);
 } 

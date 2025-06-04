@@ -1,4 +1,5 @@
 import { DomElements } from '../utils/dom-elements';
+import { ToastNotification } from '../utils/toast-notification';
 
 /**
  * UI控制器
@@ -24,6 +25,7 @@ export class UIController {
         await window.electronAPI.window.minimize();
       } catch (error) {
         console.error('[UIController] Failed to minimize window:', error);
+        this.showError('窗口最小化失败');
       }
     });
 
@@ -33,6 +35,7 @@ export class UIController {
         await window.electronAPI.window.maximize();
       } catch (error) {
         console.error('[UIController] Failed to maximize/restore window:', error);
+        this.showError('窗口最大化失败');
       }
     });
 
@@ -42,6 +45,7 @@ export class UIController {
         await window.electronAPI.window.close();
       } catch (error) {
         console.error('[UIController] Failed to close window:', error);
+        this.showError('窗口关闭失败');
       }
     });
   }
@@ -75,12 +79,11 @@ export class UIController {
   }
 
   /**
-   * 显示错误消息（可以扩展为更复杂的通知系统）
+   * 显示错误消息
    */
   showError(message: string): void {
     console.error('[UIController] Error:', message);
-    // 可以在这里添加更复杂的错误提示UI
-    // 例如：显示toast通知、错误对话框等
+    ToastNotification.error(message, { duration: 4000 });
   }
 
   /**
@@ -95,7 +98,7 @@ export class UIController {
    */
   showSuccess(message: string): void {
     console.log('[UIController] Success:', message);
-    // 可以在这里添加成功提示UI
+    ToastNotification.success(message, { duration: 3000 });
   }
 
   /**
@@ -103,19 +106,33 @@ export class UIController {
    */
   showInfo(message: string): void {
     console.info('[UIController] Info:', message);
-    // 可以在这里添加信息提示UI
+    ToastNotification.info(message, { duration: 2500 });
+  }
+
+  /**
+   * 显示警告消息
+   */
+  showWarning(message: string): void {
+    console.warn('[UIController] Warning:', message);
+    ToastNotification.warning(message, { duration: 3500 });
   }
 
   /**
    * 设置加载状态
    */
   setLoading(isLoading: boolean, message?: string): void {
-    // 可以在这里添加加载状态UI
-    // 例如：显示加载动画、禁用按钮等
     if (isLoading) {
       console.log('[UIController] Loading:', message || 'Loading...');
+      if (message) {
+        ToastNotification.info(message, { 
+          duration: 0, // 持续显示直到手动关闭
+          closable: true 
+        });
+      }
     } else {
       console.log('[UIController] Loading complete');
+      // 可以清除所有loading相关的toast
+      // ToastNotification.clearAll(); // 如果需要的话
     }
   }
 

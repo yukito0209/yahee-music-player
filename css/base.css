@@ -1,54 +1,305 @@
-/* ===== 基础样式文件 ===== */
-/* 全局样式、字体、动画等基础设置 */
+/* ===== Linear风格基础样式文件 ===== */
+/* 基于设计样例的Linear设计系统：深蓝灰背景、微噪点、极细描边、现代字体 */
 
-/* --- 全局样式重置和基础设置 --- */
+/* --- Linear风格CSS变量系统 --- */
+:root {
+  /* 背景色系 - 更接近参考设计的深蓝灰色调 */
+  --bg-primary: linear-gradient(135deg, #0f1419 0%, #1a1f2e 40%, #151b2e 70%, #0d1117 100%);
+  --bg-secondary: rgba(15, 20, 25, 0.90);
+  --bg-tertiary: rgba(26, 31, 46, 0.65);
+  --bg-glass: rgba(255, 255, 255, 0.015);
+  --bg-glass-hover: rgba(255, 255, 255, 0.03);
+  
+  /* 描边系统 - 更微妙的边框 */
+  --border-subtle: rgba(255, 255, 255, 0.03);
+  --border-emphasis: rgba(255, 255, 255, 0.06);
+  --border-strong: rgba(255, 255, 255, 0.12);
+  --border-accent: rgba(96, 165, 250, 0.25);
+  
+  /* 发光效果 - 更接近参考的蓝紫色调 */
+  --glow-primary: #4f46e5;
+  --glow-secondary: #6366f1;
+  --glow-accent: #8b5cf6;
+  --glow-subtle: rgba(79, 70, 229, 0.2);
+  
+  /* 文字颜色 */
+  --text-primary: rgba(255, 255, 255, 0.95);
+  --text-secondary: rgba(255, 255, 255, 0.65);
+  --text-tertiary: rgba(255, 255, 255, 0.35);
+  --text-accent: #a5b4fc;
+  
+  /* 阴影系统 */
+  --shadow-subtle: 0 1px 3px rgba(0, 0, 0, 0.4);
+  --shadow-medium: 0 4px 12px rgba(0, 0, 0, 0.5);
+  --shadow-strong: 0 8px 25px rgba(0, 0, 0, 0.6);
+  --shadow-glow: 0 0 20px rgba(79, 70, 229, 0.3);
+  
+  /* 渐变系统 */
+  --gradient-progress: linear-gradient(90deg, #4f46e5 0%, #7c3aed 50%, #8b5cf6 100%);
+  --gradient-accent: linear-gradient(135deg, #4f46e5 0%, #6366f1 50%, #8b5cf6 100%);
+}
+
+/* --- 全局样式重置 --- */
 * {
-    pointer-events: auto !important; /* 强制所有元素响应鼠标事件 */
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    pointer-events: auto !important;
 }
 
-body { 
-    font-family: 'Klee One', sans-serif; 
-    display: flex; 
-    flex-direction: column; 
-    height: 100vh; 
-    margin: 0; 
-    font-weight: 400; /* 默认使用 Regular 字重 */
-    user-select: none; /* 防止文本被选中 */
-    /* --- 启动淡入动画 --- */
+/* --- Linear风格body --- */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Display', 'Segoe UI', sans-serif;
+    font-weight: 400;
+    height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    user-select: none;
+    
+    /* Linear深色背景 */
+    background: var(--bg-primary);
+    background-size: 400% 400%;
+    animation: linearGradientShift 25s ease infinite;
+    
+    /* 微噪点纹理层 */
+    position: relative;
+    
+    /* 启动动画 */
     opacity: 0;
-    animation: fadeIn 0.5s ease-in-out forwards; /* forwards 保持动画结束状态 */
-    /* --- 为尺寸变化添加过渡 --- */
-    transition: width 0.3s ease-in-out, height 0.3s ease-in-out;
+    animation: fadeIn 1s ease-out forwards, linearGradientShift 25s ease infinite;
+    
+    /* 响应式过渡 */
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-h1, h2 {
-    font-family: 'Klee One', sans-serif;
-    font-weight: 700; /* 标题使用 Bold 字重 */
+/* 增强噪点纹理叠加层 - 更接近参考设计 */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0.08;
+    background-image: 
+        radial-gradient(circle at 1px 1px, rgba(255,255,255,0.2) 1px, transparent 0);
+    background-size: 16px 16px;
+    pointer-events: none;
+    z-index: 1;
+    animation: noiseMove 20s linear infinite;
 }
 
-button { 
-    padding: 8px 15px; 
-    cursor: pointer; 
+/* 噪点微动画 */
+@keyframes noiseMove {
+    0% { transform: translate(0, 0); }
+    10% { transform: translate(-1px, -1px); }
+    20% { transform: translate(1px, 0px); }
+    30% { transform: translate(0px, 1px); }
+    40% { transform: translate(-1px, 0px); }
+    50% { transform: translate(1px, 1px); }
+    60% { transform: translate(0px, -1px); }
+    70% { transform: translate(-1px, 1px); }
+    80% { transform: translate(1px, -1px); }
+    90% { transform: translate(0px, 0px); }
+    100% { transform: translate(0, 0); }
 }
 
-button, input, span {
-    font-family: inherit; /* 让它们继承 body 的字体 */
+/* Linear渐变动画 - 更缓慢优雅 */
+@keyframes linearGradientShift {
+    0%, 100% {
+        background-position: 0% 50%;
+    }
+    25% {
+        background-position: 100% 0%;
+    }
+    50% {
+        background-position: 50% 100%;
+    }
+    75% {
+        background-position: 0% 50%;
+    }
 }
 
-/* --- 动画定义 --- */
+/* 淡入动画 - Linear风格 */
 @keyframes fadeIn {
     from {
         opacity: 0;
+        transform: translateY(8px);
     }
     to {
         opacity: 1;
+        transform: translateY(0);
     }
 }
 
-/* --- 全局交互元素确保可点击 --- */
+/* --- Linear字体系统 --- */
+h1, h2, h3, h4, h5, h6 {
+    font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Display', sans-serif;
+    font-weight: 600;
+    color: var(--text-primary);
+    letter-spacing: -0.015em;
+}
+
+h1 {
+    font-size: 1.875rem;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+}
+
+h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+}
+
+/* --- Linear按钮基础样式 --- */
+button {
+    font-family: inherit;
+    border: none;
+    cursor: pointer;
+    outline: none;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* Linear极细描边 */
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    
+    /* 微妙背景 */
+    background: var(--bg-glass);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    
+    color: var(--text-secondary);
+    font-weight: 500;
+    font-size: 0.9rem;
+}
+
+button:focus {
+    outline: 2px solid var(--glow-primary);
+    outline-offset: 2px;
+    box-shadow: var(--shadow-glow);
+}
+
+button:hover {
+    border-color: var(--border-emphasis);
+    background: var(--bg-glass-hover);
+    color: var(--text-primary);
+    transform: translateY(-0.5px);
+    box-shadow: var(--shadow-subtle);
+}
+
+button:active {
+    transform: translateY(0) scale(0.98);
+}
+
+/* --- Linear输入框样式 --- */
+input {
+    font-family: inherit;
+    outline: none;
+    border: 1px solid var(--border-subtle);
+    background: var(--bg-glass);
+    color: var(--text-primary);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 0.9rem;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+input:focus {
+    border-color: var(--border-accent);
+    box-shadow: 0 0 0 3px var(--glow-subtle);
+    background: var(--bg-glass-hover);
+}
+
+/* --- Linear交互元素 --- */
+#playlist li, #toggle-playlist-btn, .progress-bar, .volume-slider {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+}
+
+/* 强制可交互性 */
 button, input, a, .control-button, .window-control-button, 
 #playlist li, #toggle-playlist-btn, .progress-bar, .volume-slider {
     pointer-events: auto !important;
     -webkit-app-region: no-drag !important;
     cursor: pointer !important;
+}
+
+/* --- Linear滚动条系统 --- */
+::-webkit-scrollbar {
+    width: 5px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+    border-radius: 3px;
+    border: 1px solid var(--border-subtle);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--gradient-accent);
+    border-radius: 3px;
+    border: 1px solid var(--border-emphasis);
+    transition: all 0.3s ease;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(180deg, 
+        var(--glow-accent) 0%, 
+        var(--glow-secondary) 100%
+    );
+    box-shadow: var(--shadow-glow);
+}
+
+/* --- Linear选择高亮 --- */
+::selection {
+    background: var(--glow-subtle);
+    color: var(--text-primary);
+}
+
+::-moz-selection {
+    background: var(--glow-subtle);
+    color: var(--text-primary);
+}
+
+/* --- Linear响应式 --- */
+@media (max-width: 768px) {
+    body {
+        font-size: 14px;
+    }
+    
+    h1 {
+        font-size: 1.5rem;
+    }
+    
+    h2 {
+        font-size: 1.25rem;
+    }
+    
+    /* 移动端噪点更细腻 */
+    body::before {
+        background-size: 12px 12px;
+        opacity: 0.06;
+    }
+}
+
+/* --- Linear动画性能优化 --- */
+* {
+    will-change: auto;
+}
+
+button, input, .control-button {
+    will-change: transform, box-shadow;
+}
+
+/* 减少动画在低性能设备上的影响 */
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
 } 

@@ -1,84 +1,94 @@
-/* ===== 播放列表样式文件 ===== */
-/* 播放列表容器、列表项、拖拽、滚动条等相关样式 */
+/* ===== Linear风格播放列表样式文件 ===== */
+/* 基于设计样例优化的播放列表容器、列表项、拖拽、滚动条等相关样式 */
 
-/* --- 播放列表容器 --- */
+/* --- Linear播放列表容器 --- */
 #playlist-container { 
-    width: 300px; 
-    border-right: 1px solid rgba(255, 255, 255, 0.2);
+    width: 320px; 
     overflow-y: auto; 
-    padding: 10px; 
+    padding: 20px; 
     display: flex; 
     flex-direction: column;
-    transition: width 0.3s ease, transform 0.3s ease, opacity 0.3s ease, padding 0.3s ease, margin 0.3s ease;
-
-    /* --- 背景图片 --- */
-    background-image: url('../assets/playlist_background.png');
-    background-size: cover; 
-    background-repeat: no-repeat; 
-    background-position: center center; 
     position: relative;
+    z-index: 2;
+    
+    /* Linear深色背景 */
+    background: var(--bg-secondary);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    
+    /* Linear极细描边 */
+    border-left: 1px solid var(--border-subtle);
+    
+    /* Linear微妙阴影 */
+    box-shadow: var(--shadow-subtle);
+    
+    /* 平滑过渡 */
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* --- 隐藏播放列表的类 --- */
 #playlist-container.playlist-hidden {
     width: 0;
-    padding-left: 0;
-    padding-right: 0;
-    margin-left: -10px;
+    padding: 0;
+    margin-left: -1px;
     opacity: 0;
-    transform: translateX(-100%);
+    transform: translateX(100%);
     overflow: hidden;
-    border-right: none;
-    transition: width 0.3s ease, transform 0.3s ease, opacity 0.3s ease, padding 0.3s ease, margin 0.3s ease;
+    border-left: none;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* --- 播放列表头部 --- */
+/* --- Linear播放列表头部 --- */
 #playlist-header { 
     display: flex;
     justify-content: space-between; 
     align-items: center;
-    margin-bottom: 10px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
     position: relative;
-    z-index: 1;
+    
+    /* Linear分割线 */
+    border-bottom: 1px solid var(--border-subtle);
 }
 
 #playlist-header h2 {
     margin: 0; 
-    color: white;
-    text-shadow: 1px 1px 2px black;
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 1.125rem;
+    letter-spacing: -0.015em;
 }
 
 #playlist-header .playlist-buttons button { 
-    margin-left: 5px;
-
-    /* --- 毛玻璃效果 --- */
-    background-color: rgba(255, 255, 255, 0.2);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+    margin-left: 10px;
+    padding: 8px 14px;
+    font-size: 0.85rem;
+    font-weight: 500;
     border-radius: 8px;
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
 
-    /* --- 按钮样式 --- */
-    padding: 6px 14px;
-    color: white;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.7);
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-    font-size: 15px;
+    /* Linear按钮样式 */
+    background: var(--bg-glass);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-secondary);
+    
+    /* Linear交互效果 */
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 #playlist-header .playlist-buttons button:hover {
-    background-color: rgba(255, 255, 255, 0.35);
-    border-color: rgba(255, 255, 255, 0.5);
+    background: var(--bg-glass-hover);
+    border-color: var(--border-emphasis);
+    color: var(--text-primary);
+    transform: translateY(-0.5px);
+    box-shadow: var(--shadow-subtle);
 }
 
 #playlist-header .playlist-buttons button:active {
-    background-color: rgba(255, 255, 255, 0.15);
-    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2);
+    transform: translateY(0) scale(0.98);
+    background: var(--bg-glass);
 }
 
-/* --- 播放列表 --- */
+/* --- Linear播放列表 --- */
 #playlist { 
     list-style: none; 
     padding: 0; 
@@ -86,29 +96,38 @@
     flex-grow: 1; 
     overflow-y: auto; 
     position: relative;
-    z-index: 1;
 
-    /* --- 半透明背景层 --- */
-    background-color: rgba(0, 0, 0, 0.4);
-    border-radius: 5px;
-    padding: 5px;
+    /* Linear容器背景 */
+    background: var(--bg-glass);
+    border: 1px solid var(--border-subtle);
+    border-radius: 10px;
+    padding: 10px;
+    
+    /* Linear微妙阴影 */
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.15);
 }
 
+/* --- Linear列表项 --- */
 #playlist li {
-    font-family: 'Klee One', sans-serif;
+    font-family: inherit;
     font-weight: 400;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 8px 12px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 14px 18px;
     cursor: grab;
-    font-size: 16px;
-    transition: background-color 0.2s ease-in-out, opacity 0.2s ease-in-out;
-    color: white;
-    text-shadow: 1px 1px 2px black;
-    border-radius: 6px;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    border-radius: 8px;
     -webkit-app-region: no-drag;
+    margin-bottom: 3px;
+    position: relative;
+    
+    /* Linear微妙边框 */
+    border: 1px solid transparent;
+    
+    /* Linear过渡效果 */
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 #playlist li .track-title { 
@@ -116,117 +135,236 @@
     overflow: hidden; 
     text-overflow: ellipsis;
     flex-grow: 1; 
-    margin-right: 10px; 
+    margin-right: 14px; 
     color: inherit;
+    font-weight: 500;
+    letter-spacing: 0.005em;
 }
 
+/* Linear悬停效果 */
 #playlist li:hover { 
-    background-color: rgba(255, 255, 255, 0.2);
-    border-radius: 6px;
+    background: var(--bg-glass-hover);
+    border-color: var(--border-subtle);
+    color: var(--text-primary);
+    transform: translateX(4px);
+    box-shadow: var(--shadow-subtle);
 }
 
+/* Linear播放中状态 - 使用参考设计的蓝紫渐变 */
 #playlist li.playing { 
-    background-color: rgba(255, 175, 228, 0.3);
-    border-radius: 6px;
-    font-weight: 700; 
-    border-bottom-color: transparent;
+    background: linear-gradient(135deg, 
+        rgba(79, 70, 229, 0.12) 0%, 
+        rgba(99, 102, 241, 0.08) 50%,
+        rgba(139, 92, 246, 0.06) 100%
+    );
+    border-color: var(--border-accent);
+    color: var(--text-accent);
+    font-weight: 600; 
+    
+    /* Linear发光效果 */
+    box-shadow: 
+        var(--shadow-glow),
+        inset 0 1px 0 rgba(79, 70, 229, 0.15);
+    
+    /* Linear脉冲动画 */
+    animation: linearPulse 4s ease-in-out infinite;
 }
 
+/* Linear脉冲动画 - 更微妙柔和 */
+@keyframes linearPulse {
+    0%, 100% {
+        box-shadow: 
+            var(--shadow-glow),
+            inset 0 1px 0 rgba(79, 70, 229, 0.15);
+    }
+    50% {
+        box-shadow: 
+            0 0 30px rgba(79, 70, 229, 0.35),
+            inset 0 1px 0 rgba(79, 70, 229, 0.2);
+    }
+}
+
+/* Linear删除按钮 */
 #playlist li .delete-track-btn { 
     background: none;
-    border: none;
-    color: #ffffff; 
+    border: 1px solid transparent;
+    color: var(--text-tertiary); 
     cursor: pointer;
     font-size: 16px; 
-    padding: 0 5px; 
+    padding: 6px 8px; 
     display: none; 
-    pointer-events: auto; 
+    pointer-events: auto;
+    border-radius: 6px;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#playlist li .delete-track-btn:hover {
+    background: rgba(239, 68, 68, 0.12);
+    border-color: rgba(239, 68, 68, 0.25);
+    color: #ef4444;
+    transform: scale(1.05);
 }
 
 #playlist li:hover .delete-track-btn { 
     display: inline-block; 
 }
 
-/* --- 拖放样式 --- */
+/* --- Linear拖放样式 --- */
 #playlist li.dragging {
-    opacity: 0.6;
-    background-color: rgba(200, 200, 200, 0.5);
+    opacity: 0.65;
+    background: var(--bg-tertiary);
+    border-color: var(--border-emphasis);
     cursor: grabbing;
+    transform: rotate(1deg) scale(1.02);
+    box-shadow: var(--shadow-medium);
 }
 
 #playlist li.over {
-    border-top: 2px solid #4dabf7;
-    background-color: rgba(77, 171, 247, 0.3);
+    border-top: 2px solid var(--glow-primary);
+    background: var(--glow-subtle);
+    box-shadow: var(--shadow-glow);
 }
 
-/* --- 空列表样式 --- */
+/* --- Linear空列表样式 --- */
 #playlist li:only-child {
-    background-color: transparent !important;
-    color: #ffffff;
-    font-family: 'Klee One', sans-serif;
-    font-weight: 400;
+    background: transparent !important;
+    border: 1px dashed var(--border-subtle) !important;
+    color: var(--text-tertiary);
+    font-style: italic;
     text-align: center;
     cursor: default;
-    border-bottom: none;
+    padding: 24px 20px;
+    font-weight: 400;
 }
 
-/* --- 播放列表切换按钮 --- */
+#playlist li:only-child::before {
+    content: "♪ 拖拽音乐文件到此处开始播放";
+    letter-spacing: 0.01em;
+}
+
+/* --- Linear播放列表切换按钮 --- */
 #toggle-playlist-btn {
     position: absolute;
-    top: 15px;
-    left: 20px;
+    top: 24px;
+    left: 24px;
     z-index: 10;
-
-    /* --- 毛玻璃效果 --- */
-    background-color: rgba(255, 255, 255, 0.2); 
-    backdrop-filter: blur(8px); 
-    -webkit-backdrop-filter: blur(8px); 
+    
+    /* Linear按钮样式 */
+    background: var(--bg-glass);
+    backdrop-filter: blur(16px); 
+    -webkit-backdrop-filter: blur(16px); 
+    border: 1px solid var(--border-subtle);
     border-radius: 50%;
-    border: 1px solid rgba(255, 255, 255, 0.3); 
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1); 
     
-    color: white; 
+    /* Linear微妙阴影 */
+    box-shadow: var(--shadow-subtle);
+    
+    color: var(--text-secondary); 
     cursor: pointer;
-    transition: background-color 0.2s ease, transform 0.2s ease; 
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); 
     
-    /* --- 尺寸设置 --- */
-    width: 36px;
-    height: 36px;
+    /* 尺寸设置 */
+    width: 42px;
+    height: 42px;
     padding: 0;
-    font-size: 18px;
-    line-height: 36px;
+    font-size: 16px;
+    line-height: 42px;
     text-align: center;
 }
 
 #toggle-playlist-btn:hover {
-    background-color: rgba(255, 255, 255, 0.35); 
-    transform: scale(1.1);
+    background: var(--bg-glass-hover);
+    border-color: var(--border-emphasis);
+    color: var(--text-primary);
+    transform: scale(1.05);
+    box-shadow: var(--shadow-medium);
 }
 
 #toggle-playlist-btn:active {
-    background-color: rgba(255, 255, 255, 0.15); 
     transform: scale(1.0);
+    background: var(--bg-glass);
 }
 
-/* --- 自定义滚动条 --- */
+/* --- Linear自定义滚动条 --- */
 #playlist::-webkit-scrollbar {
-    width: 8px;
+    width: 5px;
 }
 
 #playlist::-webkit-scrollbar-track {
-    background-color: rgba(255, 255, 255, 0.1);
-    border-radius: 10px;
-    margin: 5px 0;
+    background: var(--bg-secondary);
+    border-radius: 3px;
+    border: 1px solid var(--border-subtle);
+    margin: 6px 0;
 }
 
 #playlist::-webkit-scrollbar-thumb {
-    background-color: rgba(255, 255, 255, 0.4);
-    border-radius: 10px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    transition: background-color 0.2s ease;
+    background: var(--gradient-accent);
+    border-radius: 3px;
+    border: 1px solid var(--border-emphasis);
+    transition: all 0.3s ease;
 }
 
 #playlist::-webkit-scrollbar-thumb:hover {
-    background-color: rgba(255, 255, 255, 0.6);
-    border-color: rgba(255, 255, 255, 0.4);
+    background: linear-gradient(180deg, 
+        var(--glow-accent) 0%, 
+        var(--glow-secondary) 100%
+    );
+    box-shadow: var(--shadow-glow);
+}
+
+/* --- Linear响应式 --- */
+@media (max-width: 768px) {
+    #playlist-container {
+        width: 280px;
+        padding: 16px;
+    }
+    
+    #playlist-header {
+        margin-bottom: 16px;
+        padding-bottom: 12px;
+    }
+    
+    #playlist-header h2 {
+        font-size: 1.0rem;
+    }
+    
+    #playlist {
+        padding: 8px;
+    }
+    
+    #playlist li {
+        padding: 12px 14px;
+        font-size: 0.85rem;
+        margin-bottom: 2px;
+    }
+    
+    #toggle-playlist-btn {
+        width: 38px;
+        height: 38px;
+        font-size: 14px;
+        line-height: 38px;
+        top: 20px;
+        left: 20px;
+    }
+}
+
+@media (max-width: 480px) {
+    #playlist-container {
+        width: 260px;
+        padding: 12px;
+    }
+    
+    #playlist li {
+        padding: 10px 12px;
+        font-size: 0.8rem;
+    }
+    
+    #toggle-playlist-btn {
+        width: 36px;
+        height: 36px;
+        font-size: 13px;
+        line-height: 36px;
+        top: 16px;
+        left: 16px;
+    }
 } 

@@ -12,8 +12,17 @@ export class DomElements {
 
   // 播放器相关
   public readonly audioPlayer: HTMLAudioElement;
-  public readonly trackInfoDiv: HTMLDivElement;
   public readonly albumArtImg: HTMLImageElement;
+
+  // 歌曲详情卡片相关
+  public readonly songDetailsCard: HTMLDivElement;
+  public readonly songTitle: HTMLDivElement;
+  public readonly songArtist: HTMLDivElement;
+  public readonly songAlbum: HTMLDivElement;
+  public readonly songDuration: HTMLDivElement;
+  public readonly songFormat: HTMLDivElement;
+  public readonly songBitrate: HTMLDivElement;
+  public readonly songSamplerate: HTMLDivElement;
 
   // 控制按钮
   public readonly playPauseBtn: HTMLButtonElement;
@@ -64,8 +73,17 @@ export class DomElements {
 
     // 播放器相关
     this.audioPlayer = this.getElement<HTMLAudioElement>('audio-player');
-    this.trackInfoDiv = this.getElement<HTMLDivElement>('track-info');
     this.albumArtImg = this.getElement<HTMLImageElement>('album-art-img');
+
+    // 歌曲详情卡片相关
+    this.songDetailsCard = this.getElement<HTMLDivElement>('song-details-card');
+    this.songTitle = this.getElement<HTMLDivElement>('song-title');
+    this.songArtist = this.getElement<HTMLDivElement>('song-artist');
+    this.songAlbum = this.getElement<HTMLDivElement>('song-album');
+    this.songDuration = this.getElement<HTMLDivElement>('song-duration');
+    this.songFormat = this.getElement<HTMLDivElement>('song-format');
+    this.songBitrate = this.getElement<HTMLDivElement>('song-bitrate');
+    this.songSamplerate = this.getElement<HTMLDivElement>('song-samplerate');
 
     // 控制按钮
     this.playPauseBtn = this.getElement<HTMLButtonElement>('play-pause-btn');

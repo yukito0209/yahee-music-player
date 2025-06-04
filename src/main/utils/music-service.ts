@@ -1,5 +1,6 @@
 import * as mm from 'music-metadata';
 import * as path from 'path';
+import * as fs from 'fs/promises';
 import * as util from 'util';
 import { FileData, AlbumArt, MusicMetadata } from '../../types';
 import { createPlaylistItem } from '../../shared/utils';
@@ -39,6 +40,22 @@ export class MusicService {
     );
     
     return filesData;
+  }
+
+  /**
+   * 获取文件大小（字节）
+   */
+  async getFileSize(filePath: string): Promise<number | null> {
+    try {
+      console.log(`[MusicService] Getting file size for: ${filePath}`);
+      const stats = await fs.stat(filePath);
+      const fileSize = stats.size;
+      console.log(`[MusicService] File size: ${fileSize} bytes`);
+      return fileSize;
+    } catch (error) {
+      console.error(`[MusicService] Failed to get file size for ${filePath}:`, error);
+      return null;
+    }
   }
 
   /**

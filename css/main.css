@@ -19,6 +19,9 @@
 /* 特效样式 - 通知、拖放效果、动画等 */
 @import url('./effects.css');
 
+/* Toast通知样式 */
+@import url('./toast.css');
+
 /* ===== 文件结构说明 ===== */
 /*
  * base.css      - 基础样式、全局设置
@@ -27,4 +30,5 @@
  * controls.css  - 播放控制、进度条、音量
  * window.css    - 窗口控制、拖拽区域
  * effects.css   - 通知、拖放效果、动画
+ * toast.css     - Toast通知样式
  */ 

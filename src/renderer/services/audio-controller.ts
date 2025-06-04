@@ -26,6 +26,10 @@ export class AudioController {
     this.initializeAudioEvents();
     this.initializeProgressBar();
     this.initializeVolumeControl();
+    this.initializeAlbumCoverToggle();
+    
+    // 初始化CSS自定义属性
+    this.initializeSliderStyles();
   }
 
   /**
@@ -272,6 +276,92 @@ export class AudioController {
   }
 
   /**
+   * 初始化专辑封面点击切换歌词的事件监听器
+   */
+  private initializeAlbumCoverToggle(): void {
+    const albumContainer = document.getElementById('album-art-container');
+    const lyricsContainer = document.getElementById('lyrics-container');
+    const albumLyricsSection = document.getElementById('album-lyrics-section');
+    
+    if (!albumContainer || !lyricsContainer || !albumLyricsSection) {
+      console.warn('[AudioController] Album cover toggle elements not found');
+      return;
+    }
+
+    // 专辑封面点击事件
+    albumContainer.addEventListener('click', () => {
+      this.showLyrics();
+    });
+
+    // 歌词容器点击事件（返回专辑封面）
+    lyricsContainer.addEventListener('click', () => {
+      this.showAlbumCover();
+    });
+  }
+
+  /**
+   * 显示歌词界面
+   */
+  private showLyrics(): void {
+    const albumContainer = document.getElementById('album-art-container');
+    const lyricsContainer = document.getElementById('lyrics-container');
+    
+    if (albumContainer && lyricsContainer) {
+      // 添加淡出动画
+      albumContainer.classList.add('fade-out');
+      
+      // 延迟切换显示，等待淡出动画完成
+      setTimeout(() => {
+        albumContainer.style.display = 'none';
+        albumContainer.classList.remove('fade-out');
+        
+        // 显示歌词容器并添加淡入动画
+        lyricsContainer.style.display = 'flex';
+        lyricsContainer.classList.add('fade-in');
+        
+        // 清除淡入动画类
+        setTimeout(() => {
+          lyricsContainer.classList.remove('fade-in');
+        }, 500);
+        
+      }, 300); // 等待淡出动画完成
+      
+      console.log('[AudioController] Switching to lyrics view with animation');
+    }
+  }
+
+  /**
+   * 显示专辑封面
+   */
+  private showAlbumCover(): void {
+    const albumContainer = document.getElementById('album-art-container');
+    const lyricsContainer = document.getElementById('lyrics-container');
+    
+    if (albumContainer && lyricsContainer) {
+      // 添加淡出动画
+      lyricsContainer.classList.add('fade-out');
+      
+      // 延迟切换显示，等待淡出动画完成
+      setTimeout(() => {
+        lyricsContainer.style.display = 'none';
+        lyricsContainer.classList.remove('fade-out');
+        
+        // 显示专辑封面容器并添加淡入动画
+        albumContainer.style.display = 'flex';
+        albumContainer.classList.add('fade-in');
+        
+        // 清除淡入动画类
+        setTimeout(() => {
+          albumContainer.classList.remove('fade-in');
+        }, 500);
+        
+      }, 300); // 等待淡出动画完成
+      
+      console.log('[AudioController] Switching to album cover view with animation');
+    }
+  }
+
+  /**
    * 更新播放/暂停按钮
    */
   private updatePlayPauseButton(isPlaying: boolean): void {
@@ -291,10 +381,152 @@ export class AudioController {
    */
   private updateTrackInfo(): void {
     if (this.currentTrack) {
-      this.dom.trackInfoDiv.textContent = `当前播放: ${this.currentTrack.displayTitle}`;
+      // 更新详细信息卡片
+      const metadata = this.currentTrack.metadata;
+      
+      // 歌曲标题
+      this.dom.songTitle.textContent = metadata?.title || this.getFilenameFromPath(this.currentTrack.filePath);
+      
+      // 艺术家
+      const artist = metadata?.artist || metadata?.artists?.join(', ') || '未知艺术家';
+      this.dom.songArtist.textContent = artist;
+      
+      // 专辑
+      this.dom.songAlbum.textContent = metadata?.album || '未知专辑';
+      
+      // 格式信息
+      this.updateFormatInfo();
+      
     } else {
-      this.dom.trackInfoDiv.textContent = '当前播放: ...';
+      // 重置所有信息
+      this.resetSongDetails();
     }
+  }
+
+  /**
+   * 更新格式技术信息
+   */
+  private updateFormatInfo(): void {
+    if (!this.currentTrack) return;
+    
+    const filePath = this.currentTrack.filePath;
+    const fileExtension = filePath.split('.').pop()?.toUpperCase() || '未知';
+    
+    // 格式
+    this.dom.songFormat.textContent = fileExtension;
+    
+    // 比特率和采样率将在音频加载后更新
+    this.dom.songBitrate.textContent = '加载中...';
+    this.dom.songSamplerate.textContent = '加载中...';
+    
+    // 监听音频元数据加载完成
+    const updateMetadata = () => {
+      if (this.dom.audioPlayer.duration) {
+        // 时长
+        this.dom.songDuration.textContent = this.formatTime(this.dom.audioPlayer.duration);
+        
+        // 估算比特率（文件大小 / 时长）
+        this.estimateBitrate();
+        
+        // 采样率（如果可用）
+        this.updateSampleRate();
+      }
+    };
+    
+    if (this.dom.audioPlayer.readyState >= 1) {
+      updateMetadata();
+    } else {
+      this.dom.audioPlayer.addEventListener('loadedmetadata', updateMetadata, { once: true });
+    }
+  }
+
+  /**
+   * 估算比特率
+   */
+  private async estimateBitrate(): Promise<void> {
+    try {
+      if (!this.currentTrack) return;
+      
+      // 尝试获取文件大小
+      const fileSize = await this.getFileSize(this.currentTrack.filePath);
+      if (fileSize && this.dom.audioPlayer.duration) {
+        const durationInSeconds = this.dom.audioPlayer.duration;
+        const bitrate = Math.round((fileSize * 8) / (durationInSeconds * 1000)); // kbps
+        this.dom.songBitrate.textContent = `${bitrate} kbps`;
+      } else {
+        this.dom.songBitrate.textContent = '未知';
+      }
+    } catch (error) {
+      console.error('[AudioController] Failed to estimate bitrate:', error);
+      this.dom.songBitrate.textContent = '未知';
+    }
+  }
+
+  /**
+   * 更新采样率信息
+   */
+  private updateSampleRate(): void {
+    // HTML5 Audio API 不直接提供采样率信息
+    // 我们可以尝试使用 Web Audio API 获取更详细的信息
+    try {
+      if (window.AudioContext || (window as any).webkitAudioContext) {
+        const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
+        this.dom.songSamplerate.textContent = `${audioContext.sampleRate} Hz`;
+        audioContext.close();
+      } else {
+        this.dom.songSamplerate.textContent = '未知';
+      }
+    } catch (error) {
+      console.error('[AudioController] Failed to get sample rate:', error);
+      this.dom.songSamplerate.textContent = '未知';
+    }
+  }
+
+  /**
+   * 获取文件大小
+   */
+  private async getFileSize(filePath: string): Promise<number | null> {
+    try {
+      // 通过Electron API获取文件大小
+      if (window.electronAPI?.music?.getFileSize) {
+        return await window.electronAPI.music.getFileSize(filePath);
+      }
+      return null;
+    } catch (error) {
+      console.error('[AudioController] Failed to get file size:', error);
+      return null;
+    }
+  }
+
+  /**
+   * 重置歌曲详情
+   */
+  private resetSongDetails(): void {
+    this.dom.songTitle.textContent = '选择音乐开始播放';
+    this.dom.songArtist.textContent = '未知艺术家';
+    this.dom.songAlbum.textContent = '未知专辑';
+    this.dom.songDuration.textContent = '--:--';
+    this.dom.songFormat.textContent = '未知';
+    this.dom.songBitrate.textContent = '-- kbps';
+    this.dom.songSamplerate.textContent = '-- Hz';
+  }
+
+  /**
+   * 从文件路径提取文件名
+   */
+  private getFilenameFromPath(filePath: string): string {
+    return filePath.split(/[\\\/]/).pop()?.replace(/\.[^/.]+$/, '') || '未知文件';
+  }
+
+  /**
+   * 格式化时间
+   */
+  private formatTime(seconds: number): string {
+    if (!isFinite(seconds) || seconds < 0) return '--:--';
+    
+    const minutes = Math.floor(seconds / 60);
+    const remainingSeconds = Math.floor(seconds % 60);
+    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   }
 
   /**
@@ -321,8 +553,12 @@ export class AudioController {
    * 更新进度条样式
    */
   private updateProgressBarStyle(): void {
-    const progress = (parseFloat(this.dom.progressBar.value) / parseFloat(this.dom.progressBar.max)) * 100;
-    this.dom.progressBar.style.backgroundSize = `${progress}% 100%`;
+    const current = parseFloat(this.dom.progressBar.value);
+    const max = parseFloat(this.dom.progressBar.max);
+    const progress = max > 0 ? (current / max) * 100 : 0;
+    
+    // 使用CSS自定义属性精确控制填充
+    this.dom.progressBar.style.setProperty('--progress', `${progress}%`);
   }
 
   /**
@@ -343,9 +579,12 @@ export class AudioController {
       this.dom.volumeBtn.title = '静音';
     }
 
-    // 更新滑块
-    this.dom.volumeSlider.value = (isMuted ? 0 : volume).toString();
-    this.dom.volumeSlider.style.backgroundSize = `${(isMuted ? 0 : volume) * 100}% 100%`;
+    // 更新滑块值和填充
+    const volumeValue = isMuted ? 0 : volume;
+    this.dom.volumeSlider.value = volumeValue.toString();
+    
+    // 使用CSS自定义属性精确控制填充
+    this.dom.volumeSlider.style.setProperty('--volume', `${volumeValue * 100}%`);
   }
 
   /**
@@ -427,5 +666,27 @@ export class AudioController {
     setTimeout(() => {
       this.isHandlingError = false;
     }, 1000);
+  }
+
+  /**
+   * 初始化滑块样式
+   */
+  private initializeSliderStyles(): void {
+    // 初始化进度条样式
+    this.dom.progressBar.style.setProperty('--progress', '0%');
+    this.dom.progressBar.max = '0'; // 初始化为0，音频加载后会更新
+    this.dom.progressBar.value = '0';
+    
+    // 初始化音量条样式
+    const initialVolume = this.dom.audioPlayer.volume * 100;
+    this.dom.volumeSlider.style.setProperty('--volume', `${initialVolume}%`);
+    this.dom.volumeSlider.value = this.dom.audioPlayer.volume.toString();
+    
+    console.log('[AudioController] Slider styles initialized:', {
+      progressValue: this.dom.progressBar.value,
+      progressMax: this.dom.progressBar.max,
+      volumeValue: this.dom.volumeSlider.value,
+      audioVolume: this.dom.audioPlayer.volume
+    });
   }
 } 

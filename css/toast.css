@@ -1,0 +1,309 @@
+/* ===== Linear风格Toast通知系统样式 ===== */
+/* 基于设计样例的用户反馈通知，优雅简洁的Linear风格 */
+
+/* --- Linear Toast容器 --- */
+.toast-container {
+  position: fixed;
+  top: 60px; /* 下移至60px，避免与窗口控制按钮重叠 */
+  right: 20px;
+  z-index: 10000;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  max-width: 420px;
+}
+
+/* --- Linear Toast基础样式 --- */
+.toast {
+  pointer-events: auto;
+  position: relative;
+  
+  /* --- Linear毛玻璃效果 --- */
+  background: var(--bg-glass);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  box-shadow: var(--shadow-medium);
+  
+  /* --- 布局 --- */
+  padding: 16px 20px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-height: 64px;
+  
+  /* --- Linear字体 --- */
+  font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'SF Pro Display', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-primary);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
+  letter-spacing: 0.005em;
+  
+  /* --- Linear动画 --- */
+  transform: translateX(100%) scale(0.9);
+  opacity: 0;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* --- 显示状态 --- */
+.toast.toast-show {
+  transform: translateX(0) scale(1);
+  opacity: 1;
+}
+
+/* --- 隐藏状态 --- */
+.toast.toast-hide {
+  transform: translateX(100%) scale(0.9);
+  opacity: 0;
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* --- Linear Toast内容 --- */
+.toast-content {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-grow: 1;
+}
+
+/* --- Linear Toast图标 --- */
+.toast-icon {
+  width: 24px;
+  height: 24px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: var(--bg-glass-hover);
+  border: 1px solid var(--border-subtle);
+}
+
+.toast-icon svg {
+  width: 18px;
+  height: 18px;
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4));
+}
+
+/* --- Linear Toast消息文本 --- */
+.toast-message {
+  flex-grow: 1;
+  line-height: 1.5;
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+/* --- Linear关闭按钮 --- */
+.toast-close {
+  background: var(--bg-glass);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-tertiary);
+  cursor: pointer;
+  font-size: 18px;
+  line-height: 1;
+  padding: 6px;
+  border-radius: 6px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toast-close:hover {
+  background: var(--bg-glass-hover);
+  border-color: var(--border-emphasis);
+  color: var(--text-secondary);
+  transform: scale(1.05);
+}
+
+.toast-close:active {
+  transform: scale(0.95);
+}
+
+/* --- Linear成功样式 --- */
+.toast.toast-success {
+  border-left: 3px solid #10b981;
+  background: linear-gradient(135deg, 
+    var(--bg-glass) 0%, 
+    rgba(16, 185, 129, 0.06) 100%
+  );
+}
+
+.toast.toast-success .toast-icon {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.2);
+  color: #34d399;
+}
+
+/* --- Linear错误样式 --- */
+.toast.toast-error {
+  border-left: 3px solid #ef4444;
+  background: linear-gradient(135deg, 
+    var(--bg-glass) 0%, 
+    rgba(239, 68, 68, 0.06) 100%
+  );
+}
+
+.toast.toast-error .toast-icon {
+  background: rgba(239, 68, 68, 0.1);
+  border-color: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+}
+
+/* --- Linear警告样式 --- */
+.toast.toast-warning {
+  border-left: 3px solid #f59e0b;
+  background: linear-gradient(135deg, 
+    var(--bg-glass) 0%, 
+    rgba(245, 158, 11, 0.06) 100%
+  );
+}
+
+.toast.toast-warning .toast-icon {
+  background: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
+}
+
+/* --- Linear信息样式 --- */
+.toast.toast-info {
+  border-left: 3px solid var(--glow-primary);
+  background: linear-gradient(135deg, 
+    var(--bg-glass) 0%, 
+    var(--glow-subtle) 100%
+  );
+}
+
+.toast.toast-info .toast-icon {
+  background: var(--glow-subtle);
+  border-color: var(--border-accent);
+  color: var(--text-accent);
+}
+
+/* --- 悬停效果 --- */
+.toast:hover {
+  background: var(--bg-glass-hover);
+  border-color: var(--border-emphasis);
+  transform: translateX(0) scale(1.02);
+  box-shadow: var(--shadow-strong);
+}
+
+/* --- Linear进度条 --- */
+.toast-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  background: var(--gradient-accent);
+  border-radius: 0 0 10px 10px;
+  transition: width 0.1s linear;
+}
+
+.toast.toast-success .toast-progress {
+  background: linear-gradient(90deg, #10b981, #34d399);
+}
+
+.toast.toast-error .toast-progress {
+  background: linear-gradient(90deg, #ef4444, #f87171);
+}
+
+.toast.toast-warning .toast-progress {
+  background: linear-gradient(90deg, #f59e0b, #fbbf24);
+}
+
+.toast.toast-info .toast-progress {
+  background: var(--gradient-accent);
+}
+
+/* --- 自动隐藏堆叠限制 --- */
+.toast:nth-child(n+4) {
+  opacity: 0.8;
+  transform: translateX(0) scale(0.95);
+}
+
+.toast:nth-child(n+6) {
+  display: none;
+}
+
+/* --- Linear加载动画 --- */
+@keyframes linearPulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.toast.toast-loading .toast-icon {
+  animation: linearPulse 2s ease-in-out infinite;
+}
+
+/* --- Linear响应式设计 --- */
+@media (max-width: 768px) {
+  .toast-container {
+    top: 50px;
+    right: 16px;
+    left: 16px;
+    max-width: none;
+  }
+  
+  .toast {
+    padding: 14px 18px;
+    min-height: 58px;
+    font-size: 0.85rem;
+  }
+  
+  .toast-icon {
+    width: 22px;
+    height: 22px;
+  }
+  
+  .toast-icon svg {
+    width: 16px;
+    height: 16px;
+  }
+  
+  .toast-close {
+    width: 26px;
+    height: 26px;
+    font-size: 16px;
+  }
+}
+
+@media (max-width: 480px) {
+  .toast-container {
+    top: 44px;
+    right: 12px;
+    left: 12px;
+  }
+  
+  .toast {
+    padding: 12px 16px;
+    min-height: 54px;
+    font-size: 0.8rem;
+    gap: 12px;
+  }
+  
+  .toast-icon {
+    width: 20px;
+    height: 20px;
+  }
+  
+  .toast-icon svg {
+    width: 14px;
+    height: 14px;
+  }
+  
+  .toast-close {
+    width: 24px;
+    height: 24px;
+    font-size: 14px;
+  }
+} 

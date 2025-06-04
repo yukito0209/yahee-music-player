@@ -12,6 +12,7 @@ const electronAPI: ElectronApi = {
   music: {
     openFileDialog: () => ipcRenderer.invoke(IPC_CHANNELS.DIALOG_OPEN_FILE),
     getAlbumArt: (filePath: string) => ipcRenderer.invoke(IPC_CHANNELS.GET_ALBUM_ART, filePath),
+    getFileSize: (filePath: string) => ipcRenderer.invoke(IPC_CHANNELS.GET_FILE_SIZE, filePath),
   },
 };
 

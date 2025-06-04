@@ -4,6 +4,7 @@ import { FileData, AlbumArt } from './music';
 export const IPC_CHANNELS = {
   DIALOG_OPEN_FILE: 'dialog:openFile',
   GET_ALBUM_ART: 'get-album-art',
+  GET_FILE_SIZE: 'get-file-size',
   WINDOW_MINIMIZE: 'window:minimize',
   WINDOW_MAXIMIZE: 'window:maximize',
   WINDOW_CLOSE: 'window:close',
@@ -35,6 +36,7 @@ export interface WindowApi {
 export interface MusicApi {
   openFileDialog: () => Promise<FileDialogResponse>;
   getAlbumArt: (filePath: string) => Promise<AlbumArtResponse>;
+  getFileSize: (filePath: string) => Promise<number | null>;
 }
 
 // 完整的预加载API接口
