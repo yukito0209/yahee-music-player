@@ -2,23 +2,41 @@
   "name": "yahee-music-player",
   "version": "1.0.0",
   "description": "一个简洁美观的本地音乐播放器",
-  "main": "main.js",
+  "main": "dist/main/main.js",
   "scripts": {
-    "start": "electron .",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dist": "electron-builder"
+    "build": "tsc && npm run build:renderer && npm run build:preload",
+    "build:renderer": "esbuild src/renderer/main.ts --bundle --outfile=dist/renderer/main.js --platform=browser --target=es2020 --format=iife",
+    "build:preload": "esbuild src/main/preload.ts --bundle --outfile=dist/main/preload.js --platform=node --target=es2020 --format=cjs --external:electron",
+    "build:watch": "tsc --watch",
+    "start": "npm run build && electron dist/main/main.js",
+    "dev": "npm run build && electron dist/main/main.js",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts",
+    "lint:fix": "eslint src/**/*.ts --fix",
+    "format": "prettier --write src/**/*.ts",
+    "dist": "npm run build && electron-builder"
   },
   "keywords": [
     "music",
     "player",
-    "electron"
+    "electron",
+    "typescript"
   ],
   "author": "Kerwin Wang <yukitoqaq@gmail.com>",
   "homepage": "https://github.com/yukito0209/yahee-music-player",
   "license": "ISC",
   "devDependencies": {
+    "@types/jest": "^29.5.14",
+    "@types/node": "^20.17.57",
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
     "electron": "^35.1.5",
-    "electron-builder": "^26.0.12"
+    "electron-builder": "^26.0.12",
+    "esbuild": "^0.25.5",
+    "eslint": "^8.57.1",
+    "jest": "^29.7.0",
+    "prettier": "^3.5.3",
+    "typescript": "^5.8.3"
   },
   "dependencies": {
     "debug": "^4.4.0",
@@ -28,14 +46,14 @@
     "appId": "com.yukito0209.yaheemusic",
     "productName": "YAHEE MUSIC",
     "directories": {
-      "output": "dist",
+      "output": "dist-electron",
       "buildResources": "assets"
     },
     "files": [
-      "**/*",
-      "!node_modules${/*}",
-      "node_modules/music-metadata${/*}",
-      "assets/**/*"
+      "dist/**/*",
+      "assets/**/*",
+      "index.html",
+      "styles.css"
     ],
     "win": {
       "target": "nsis",

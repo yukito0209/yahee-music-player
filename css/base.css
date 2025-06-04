@@ -1,0 +1,54 @@
+/* ===== 基础样式文件 ===== */
+/* 全局样式、字体、动画等基础设置 */
+
+/* --- 全局样式重置和基础设置 --- */
+* {
+    pointer-events: auto !important; /* 强制所有元素响应鼠标事件 */
+}
+
+body { 
+    font-family: 'Klee One', sans-serif; 
+    display: flex; 
+    flex-direction: column; 
+    height: 100vh; 
+    margin: 0; 
+    font-weight: 400; /* 默认使用 Regular 字重 */
+    user-select: none; /* 防止文本被选中 */
+    /* --- 启动淡入动画 --- */
+    opacity: 0;
+    animation: fadeIn 0.5s ease-in-out forwards; /* forwards 保持动画结束状态 */
+    /* --- 为尺寸变化添加过渡 --- */
+    transition: width 0.3s ease-in-out, height 0.3s ease-in-out;
+}
+
+h1, h2 {
+    font-family: 'Klee One', sans-serif;
+    font-weight: 700; /* 标题使用 Bold 字重 */
+}
+
+button { 
+    padding: 8px 15px; 
+    cursor: pointer; 
+}
+
+button, input, span {
+    font-family: inherit; /* 让它们继承 body 的字体 */
+}
+
+/* --- 动画定义 --- */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+/* --- 全局交互元素确保可点击 --- */
+button, input, a, .control-button, .window-control-button, 
+#playlist li, #toggle-playlist-btn, .progress-bar, .volume-slider {
+    pointer-events: auto !important;
+    -webkit-app-region: no-drag !important;
+    cursor: pointer !important;
+} 

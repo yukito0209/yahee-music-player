@@ -1,0 +1,174 @@
+/* ===== 控制组件样式文件 ===== */
+/* 播放控制按钮、进度条、音量控制等相关样式 */
+
+/* --- 播放器栏容器 --- */
+#player-bar-wrapper {
+    margin-top: auto; /* 在 flex 容器中将元素推到底部 */
+    
+    /* --- 毛玻璃效果 --- */
+    background-color: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+
+    /* --- 布局和间距 --- */
+    padding: 5px 15px;
+    display: flex;
+    align-items: center;
+}
+
+.custom-controls {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    gap: 15px;
+    color: white;
+}
+
+/* --- 时间显示 --- */
+.time-display {
+    font-size: 14px;
+    min-width: 40px;
+    text-align: center;
+    opacity: 0.8;
+}
+
+.current-time {
+    text-align: right;
+}
+
+.total-time {
+    text-align: left;
+}
+
+/* --- 控制按钮组 --- */
+.control-buttons {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* --- 通用按钮样式 --- */
+.control-button {
+    background: none;
+    border: none;
+    padding: 5px;
+    cursor: pointer;
+    color: rgba(255, 255, 255, 0.8);
+    transition: color 0.2s ease, transform 0.1s ease;
+    line-height: 0;
+}
+
+.control-button:hover {
+    color: white;
+}
+
+.control-button:active {
+    transform: scale(0.9);
+}
+
+/* --- 播放/暂停按钮 --- */
+#play-pause-btn {
+    padding: 8px; 
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+}
+
+#play-pause-btn:hover {
+    background-color: rgba(255, 255, 255, 0.35);
+}
+
+/* --- 进度条容器 --- */
+.progress-bar-container {
+    flex-grow: 1; 
+    height: 12px;
+    cursor: pointer; 
+    margin: 0 10px; 
+    display: flex;
+    align-items: center;
+}
+
+/* --- 进度条样式 --- */
+.progress-bar {
+    -webkit-appearance: none; 
+    appearance: none; 
+    width: 100%; 
+    height: 4px; 
+    background: linear-gradient(to right, 
+        rgba(255, 255, 255, 0.7) 0%,
+        rgba(255, 255, 255, 0.2) 0%
+    );
+    border-radius: 2px; 
+    outline: none; 
+    cursor: pointer;
+}
+
+.progress-bar::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 4px;
+    cursor: pointer;
+    background: transparent;
+    border-radius: 2px; 
+}
+
+.progress-bar::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 14px;
+    height: 14px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    cursor: pointer;
+    margin-top: -5px;
+    transition: background 0.2s ease, transform 0.1s ease;
+}
+
+.progress-bar:hover::-webkit-slider-thumb {
+    background: white;
+}
+
+.progress-bar:active::-webkit-slider-thumb {
+    transform: scale(1.1);
+}
+
+/* --- 音量控制容器 --- */
+.volume-control-container {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 130px;
+}
+
+/* --- 音量滑块 --- */
+.volume-slider {
+    -webkit-appearance: none; 
+    appearance: none; 
+    width: 100%;
+    height: 4px; 
+    background: rgba(255, 255, 255, 0.2); 
+    border-radius: 2px; 
+    outline: none; 
+    cursor: pointer;
+    background-image: linear-gradient(to right, rgba(255, 255, 255, 0.6), rgba(255, 255, 255, 0.6));
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
+}
+
+.volume-slider::-webkit-slider-thumb {
+    -webkit-appearance: none; 
+    appearance: none;
+    width: 12px;
+    height: 12px; 
+    background: rgba(255, 255, 255, 0.9); 
+    border-radius: 50%; 
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    margin-top: -4px;
+}
+
+.volume-slider:hover::-webkit-slider-thumb {
+    background: white;
+} 

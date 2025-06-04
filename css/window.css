@@ -1,0 +1,46 @@
+/* ===== 窗口控制样式文件 ===== */
+/* 窗口控制按钮、拖拽等相关样式 */
+
+/* --- 窗口控制按钮 --- */
+.window-controls {
+    position: absolute;
+    top: 0;
+    right: 0;
+    display: flex;
+    z-index: 1000;
+    -webkit-app-region: no-drag; /* 按钮区域不可拖动 */
+    padding-right: 10px;
+    height: 30px; /* 添加固定高度 */
+}
+
+.window-control-button {
+    width: 30px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    -webkit-app-region: no-drag; /* 确保按钮本身不可拖动 */
+    user-select: none; /* 防止文本被选中 */
+}
+
+.window-control-button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.window-control-button.close:hover {
+    background-color: #e81123;
+}
+
+.window-control-button svg {
+    -webkit-app-region: no-drag; /* 确保 SVG 本身也不可拖动 */
+    pointer-events: none; /* 避免 SVG 捕获鼠标事件 */
+}
+
+/* --- 确保按钮和输入框不可拖动 --- */
+button, input, a, .control-button, .volume-slider, .progress-bar, 
+#playlist li, #toggle-playlist-btn, .window-control-button {
+    -webkit-app-region: no-drag;
+} 

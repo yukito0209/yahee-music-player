@@ -1,4 +1,10 @@
 /* 使用 4 个空格缩进 */
+
+/* --- 强制修复鼠标交互问题 --- */
+* {
+    pointer-events: auto !important; /* 强制所有元素响应鼠标事件 */
+}
+
 body { 
     font-family: 'Klee One', sans-serif; 
     display: flex; 
@@ -7,7 +13,7 @@ body {
     margin: 0; 
     font-weight: 400; /* 例如，默认使用 Regular 字重 */
     /* --- 添加无边框窗口样式 --- */
-    -webkit-app-region: drag; /* 使整个窗口可拖动 */
+    /* -webkit-app-region: drag; */ /* 暂时注释掉整体拖拽，避免干扰按钮交互 */
     user-select: none; /* 防止文本被选中 */
     /* --- 新增：启动淡入动画 --- */
     opacity: 0;
@@ -15,10 +21,36 @@ body {
     /* --- 新增：为尺寸变化添加过渡 --- */
     transition: width 0.3s ease-in-out, height 0.3s ease-in-out; /* 添加平滑过渡 */
 }
+
+/* --- 新增：为特定区域添加拖拽功能 --- */
+#player-controls::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 100px; /* 不覆盖右侧100px区域，为按钮留出空间 */
+    height: 60px; /* 顶部60px区域可拖拽 */
+    -webkit-app-region: drag;
+    z-index: -1; /* 放在内容后面 */
+    pointer-events: none; /* 不干扰其他交互 */
+}
+
 h1, h2 {
     font-family: 'Klee One', sans-serif; /* 确保标题也使用 */
     font-weight: 700; /* 标题使用 Bold 字重 */
 }
+
+/* --- 新增：为标题栏区域添加拖拽功能 --- */
+#player-controls h1 {
+    color: white; /* 如果上面设置了 player-controls 的 color，这里通常会继承 */
+    text-align: center; /* 让标题居中可能更好看 */
+    /* text-shadow: 1px 1px 3px rgba(0,0,0,0.7); */
+    margin-bottom: 10px; /* 标题和下方内容的间距 */
+    -webkit-app-region: drag; /* 让标题区域可拖拽 */
+    padding: 15px 0; /* 增加拖拽区域 */
+    cursor: move; /* 显示移动光标 */
+}
+
 .main-content {
     flex-grow: 1;
     display: flex;
@@ -130,6 +162,9 @@ h1, h2 {
     text-align: center; /* 让标题居中可能更好看 */
     /* text-shadow: 1px 1px 3px rgba(0,0,0,0.7); */
     margin-bottom: 10px; /* 标题和下方内容的间距 */
+    -webkit-app-region: drag; /* 让标题区域可拖拽 */
+    padding: 15px 0; /* 增加拖拽区域 */
+    cursor: move; /* 显示移动光标 */
 }
 #playlist { 
     list-style: none; 
@@ -513,13 +548,16 @@ button, input, span { /* 为按钮、输入框、span 等也设置一下 */
     background: transparent; 
 } */
 /* --- 新增：右上角按钮通用样式 --- */
+/* 暂时注释掉，GitHub按钮已移除
 .top-right-button {
     position: absolute;
-    top: 35px;
-    right: 15px; /* 调整右侧位置，避免与窗口控制按钮重叠 */
-    z-index: 10;
-    /* 其他样式保持不变 */
+    top: 20px;
+    right: 50px;
+    z-index: 1001;
+    pointer-events: auto !important;
+    -webkit-app-region: no-drag !important;
 }
+*/
 /* --- 添加窗口控制按钮样式 --- */
 .window-controls {
     position: absolute;
@@ -550,7 +588,8 @@ button, input, span { /* 为按钮、输入框、span 等也设置一下 */
     background-color: #e81123;
 }
 /* 确保按钮和输入框不可拖动 */
-button, input, a {
+button, input, a, .control-button, .volume-slider, .progress-bar, 
+#playlist li, #toggle-playlist-btn, .window-control-button {
     -webkit-app-region: no-drag;
 }
 .window-control-button svg {
@@ -565,4 +604,72 @@ button, input, a {
     to {
         opacity: 1;
     }
+}
+
+/* 新增：拖放效果样式 */
+body.drag-over {
+    position: relative;
+}
+
+body.drag-over::before {
+    content: '拖放音频文件到这里';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: bold;
+    z-index: 10000;
+    pointer-events: none;
+}
+
+/* 拖拽状态下的播放列表项样式 */
+#playlist li.dragging {
+    opacity: 0.5;
+    transform: rotate(5deg);
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+/* 错误和成功消息样式（为将来的通知系统准备） */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 12px 20px;
+    border-radius: 8px;
+    color: white;
+    font-weight: bold;
+    z-index: 10000;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+}
+
+.notification.show {
+    transform: translateX(0);
+}
+
+.notification.error {
+    background: rgba(255, 0, 0, 0.9);
+}
+
+.notification.success {
+    background: rgba(0, 255, 0, 0.9);
+}
+
+.notification.info {
+    background: rgba(0, 123, 255, 0.9);
+}
+
+/* --- 特别确保交互元素可点击 --- */
+button, input, a, .control-button, .window-control-button, 
+#playlist li, #toggle-playlist-btn, .progress-bar, .volume-slider {
+    pointer-events: auto !important;
+    -webkit-app-region: no-drag !important;
+    cursor: pointer !important;
 } 
