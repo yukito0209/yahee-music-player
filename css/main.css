@@ -1,0 +1,34 @@
+/* ===== YAHEE MUSIC 主样式文件 ===== */
+/* 导入所有模块化的CSS文件 */
+
+/* 基础样式 - 全局设置、字体、动画等 */
+@import url('./base.css');
+
+/* 布局样式 - 主要容器、网格、布局等 */
+@import url('./layout.css');
+
+/* 播放列表样式 - 播放列表相关的所有样式 */
+@import url('./playlist.css');
+
+/* 控制组件样式 - 播放控制、进度条、音量等 */
+@import url('./controls.css');
+
+/* 窗口控制样式 - 窗口按钮、拖拽等 */
+@import url('./window.css');
+
+/* 特效样式 - 通知、拖放效果、动画等 */
+@import url('./effects.css');
+
+/* Toast通知样式 */
+@import url('./toast.css');
+
+/* ===== 文件结构说明 ===== */
+/*
+ * base.css      - 基础样式、全局设置
+ * layout.css    - 布局容器、主要结构
+ * playlist.css  - 播放列表、列表项、拖拽
+ * controls.css  - 播放控制、进度条、音量
+ * window.css    - 窗口控制、拖拽区域
+ * effects.css   - 通知、拖放效果、动画
+ * toast.css     - Toast通知样式
+ */ 

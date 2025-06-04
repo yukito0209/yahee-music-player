@@ -1,0 +1,632 @@
+/* ===== Linear风格布局样式文件 ===== */
+/* 基于设计样例优化的主要布局容器、网格、flexbox等布局相关样式 */
+
+/* --- 主要布局结构 --- */
+.main-content {
+    flex-grow: 1;
+    display: flex;
+    overflow: hidden;
+    position: relative;
+    z-index: 2; /* 在噪点纹理之上 */
+}
+
+#player-controls { 
+    padding: 24px; 
+    flex-grow: 1; 
+    display: flex; 
+    flex-direction: column; 
+    height: 100vh; /* 占满整个视口高度 */
+
+    /* --- Linear深色背景 --- */
+    background: var(--bg-secondary);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+    
+    /* --- Linear极细描边 --- */
+    border-right: 1px solid var(--border-subtle);
+    
+    /* --- 样式设置 --- */
+    color: var(--text-primary); 
+    position: relative;
+    overflow: hidden;
+    
+    /* Linear微妙阴影 */
+    box-shadow: var(--shadow-subtle);
+}
+
+/* --- Linear拖拽区域 --- */
+#player-controls::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 120px; /* 为窗口控制按钮留出空间 */
+    height: 60px; 
+    -webkit-app-region: drag;
+    z-index: -1;
+    pointer-events: none;
+    
+    /* Linear微妙的拖拽区域指示 */
+    background: linear-gradient(90deg, 
+        transparent 0%, 
+        var(--bg-glass) 50%, 
+        transparent 100%
+    );
+}
+
+/* --- Linear标题样式 --- */
+#player-controls h1 {
+    color: var(--text-primary);
+    text-align: center;
+    margin-bottom: 24px;
+    -webkit-app-region: drag;
+    padding: 24px 120px 20px 0;
+    cursor: move;
+    
+    /* Linear字体效果 */
+    font-weight: 700;
+    font-size: 1.875rem;
+    letter-spacing: -0.025em;
+    
+    /* 微妙的文字阴影 */
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+    
+    /* Linear渐变文字效果 */
+    background: linear-gradient(135deg, 
+        var(--text-primary) 0%, 
+        var(--text-accent) 100%
+    );
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* --- Linear主要内容区域 --- */
+.player-main-content {
+    display: flex;
+    flex-grow: 1;
+    gap: 32px;
+    margin-bottom: 24px;
+    min-height: 0; /* 允许flex子项收缩 */
+    height: 100%; /* 确保占满可用高度 */
+}
+
+/* --- Linear歌曲信息区域 --- */
+.song-info-section {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    width: 350px; /* 固定宽度，给详情信息更多空间 */
+}
+
+/* --- Linear专辑封面/歌词显示区域 --- */
+.album-lyrics-section {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 0;
+    height: 100%; /* 确保占满可用高度 */
+    position: relative;
+    
+    /* Linear毛玻璃容器 */
+    background: var(--bg-glass);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    
+    /* Linear极细描边 */
+    border: 1px solid var(--border-subtle);
+    border-radius: 16px;
+    
+    /* Linear内容样式 */
+    padding: 24px;
+    
+    /* Linear微妙阴影 */
+    box-shadow: var(--shadow-subtle);
+    
+    /* Linear交互效果 */
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.album-lyrics-section:hover {
+    background: var(--bg-glass-hover);
+    border-color: var(--border-emphasis);
+    box-shadow: var(--shadow-medium);
+}
+
+/* --- 专辑封面容器（新位置，自适应大小） --- */
+.album-art-container {
+    /* 使用flex-grow和flex-shrink实现真正的自适应 */
+    flex: 1;
+    
+    /* 尺寸计算：取容器宽度和高度的较小值，确保正方形 */
+    width: min(100%, calc(100vh - 300px)); /* 减去标题、控制栏、padding的高度 */
+    height: min(100%, calc(100vh - 300px));
+    
+    /* 限制最大和最小尺寸 */
+    max-width: min(800px, calc(100vw - 450px)); /* 增大最大尺寸到500px */
+    max-height: min(800px, calc(100vh - 250px));
+    min-width: 200px;
+    min-height: 200px;
+    
+    aspect-ratio: 1;
+    border-radius: 20px;
+    overflow: hidden;
+    position: relative;
+    cursor: pointer;
+    
+    /* Linear极细描边 */
+    border: 1px solid var(--border-emphasis);
+    
+    /* Linear深度阴影 */
+    box-shadow: 
+        var(--shadow-strong),
+        inset 0 1px 0 var(--border-subtle);
+        
+    /* Linear毛玻璃背景 */
+    background: var(--bg-tertiary);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    
+    /* 点击交互效果 */
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* 淡入淡出动画 */
+    opacity: 1;
+    animation: fadeIn 0.5s ease-out;
+}
+
+.album-art-container:hover {
+    transform: translateY(-2px) scale(1.01);
+    box-shadow: 
+        var(--shadow-strong),
+        var(--shadow-glow),
+        inset 0 1px 0 var(--border-strong);
+    border-color: var(--border-accent);
+}
+
+.album-art-container:active {
+    transform: translateY(0) scale(0.99);
+    transition-duration: 0.1s;
+}
+
+/* --- 专辑封面占位符 --- */
+.album-art-container::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80px;
+    height: 80px;
+    background: var(--gradient-accent);
+    border-radius: 50%;
+    opacity: 0.15;
+    z-index: 1;
+}
+
+/* --- 专辑封面图片 --- */
+.album-art-container #album-art-img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: relative;
+    z-index: 2;
+    
+    /* 确保图片完全填充容器 */
+    object-position: center;
+    
+    /* Linear图片效果 */
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* --- 点击提示 --- */
+.click-hint {
+    position: absolute;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 3;
+    
+    /* Linear毛玻璃容器 */
+    background: var(--bg-glass);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    
+    /* Linear极细描边 */
+    border: 1px solid var(--border-subtle);
+    border-radius: 20px;
+    
+    /* 样式 */
+    padding: 8px 16px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--text-tertiary);
+    
+    /* 动画效果 */
+    opacity: 0;
+    transform: translateX(-50%) translateY(10px);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none;
+}
+
+.album-art-container:hover .click-hint {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
+
+/* --- 歌词容器 --- */
+.lyrics-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    
+    /* 淡入淡出动画 */
+    opacity: 1;
+    animation: fadeIn 0.5s ease-out;
+}
+
+/* --- 歌词占位符 --- */
+.lyrics-placeholder {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex-grow: 1;
+    color: var(--text-tertiary);
+    font-style: italic;
+    text-align: center;
+    gap: 16px;
+}
+
+.lyrics-placeholder-icon {
+    width: 64px;
+    height: 64px;
+    background: var(--gradient-accent);
+    border-radius: 50%;
+    opacity: 0.3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: var(--text-accent);
+}
+
+.lyrics-placeholder-text {
+    font-size: 1.1rem;
+    font-weight: 500;
+    margin-bottom: 8px;
+}
+
+.lyrics-placeholder-subtitle {
+    font-size: 0.9rem;
+    opacity: 0.7;
+}
+
+/* --- Linear歌曲详情卡片 --- */
+.song-details-card {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    
+    /* Linear毛玻璃容器 */
+    background: var(--bg-glass);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    
+    /* Linear极细描边 */
+    border: 1px solid var(--border-subtle);
+    border-radius: 12px;
+    
+    /* Linear内容样式 */
+    padding: 20px;
+    
+    /* Linear微妙阴影 */
+    box-shadow: var(--shadow-subtle);
+    
+    /* Linear交互效果 */
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.song-details-card:hover {
+    background: var(--bg-glass-hover);
+    border-color: var(--border-emphasis);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-medium);
+}
+
+/* --- 歌曲标题 --- */
+.song-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text-primary);
+    line-height: 1.3;
+    margin-bottom: 4px;
+    letter-spacing: -0.01em;
+    
+    /* 处理长标题的溢出 */
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* --- 艺术家信息 --- */
+.song-artist {
+    font-size: 0.95rem;
+    font-weight: 500;
+    color: var(--text-accent);
+    margin-bottom: 8px;
+    letter-spacing: 0.005em;
+}
+
+/* --- 专辑信息 --- */
+.song-album {
+    font-size: 0.9rem;
+    font-weight: 400;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+    opacity: 0.8;
+}
+
+/* --- 技术信息网格 --- */
+.song-meta-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    font-size: 0.85rem;
+}
+
+.meta-item {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.meta-label {
+    font-weight: 500;
+    color: var(--text-tertiary);
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.meta-value {
+    font-weight: 500;
+    color: var(--text-secondary);
+    font-variant-numeric: tabular-nums;
+}
+
+/* --- Linear曲目信息（简化版） --- */
+#track-info { 
+    width: 100%;
+    font-style: normal; 
+    min-height: 2.5em; 
+    
+    /* Linear毛玻璃容器 */
+    background: var(--bg-glass);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    
+    /* Linear极细描边 */
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px; /* 更小的圆角，作为次要信息 */
+    
+    /* Linear内容样式 */
+    padding: 12px 16px;
+    color: var(--text-tertiary);
+    text-align: center; 
+    font-weight: 400;
+    font-size: 0.85rem;
+    line-height: 1.4;
+    letter-spacing: 0.01em;
+    
+    /* Linear微妙阴影 */
+    box-shadow: var(--shadow-subtle);
+    
+    /* Linear交互效果 */
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#track-info:hover {
+    background: var(--bg-glass-hover);
+    border-color: var(--border-emphasis);
+    color: var(--text-secondary);
+    transform: translateY(-0.5px);
+}
+
+/* Linear空状态文字 */
+#track-info:empty::before {
+    content: '♪ 当前无音乐播放';
+    color: var(--text-tertiary);
+    font-style: italic;
+    font-weight: 400;
+}
+
+/* --- 隐藏的音频播放器 --- */
+#audio-player { 
+    display: none !important;
+    width: 95%; 
+    background: transparent;
+    margin: 0 auto;
+}
+
+/* --- Linear响应式布局 --- */
+@media (max-width: 1024px) {
+    .player-main-content {
+        gap: 24px;
+    }
+    
+    .song-info-section {
+        width: 300px;
+    }
+    
+    .album-art-container {
+        max-width: 300px;
+        max-height: 300px;
+        border-radius: 16px;
+    }
+    
+    .song-details-card {
+        padding: 18px;
+    }
+    
+    .song-meta-grid {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+}
+
+@media (max-width: 768px) {
+    #player-controls {
+        padding: 20px;
+    }
+    
+    #player-controls h1 {
+        font-size: 1.5rem;
+        padding: 20px 100px 16px 0;
+        margin-bottom: 20px;
+        letter-spacing: -0.02em;
+    }
+    
+    .player-main-content {
+        flex-direction: column;
+        gap: 20px;
+    }
+    
+    .song-info-section {
+        width: 100%;
+    }
+    
+    .album-lyrics-section {
+        min-height: 300px;
+    }
+    
+    .album-art-container {
+        max-width: 250px;
+        max-height: 250px;
+        border-radius: 14px;
+    }
+    
+    .song-details-card {
+        padding: 16px;
+        gap: 10px;
+    }
+    
+    .song-title {
+        font-size: 1rem;
+        -webkit-line-clamp: 1;
+    }
+    
+    .song-artist, .song-album {
+        font-size: 0.85rem;
+    }
+    
+    .song-meta-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+        font-size: 0.8rem;
+    }
+} 
+
+@media (max-width: 480px) {
+    #player-controls {
+        padding: 16px;
+    }
+    
+    #player-controls h1 {
+        font-size: 1.375rem;
+        padding: 16px 80px 12px 0;
+        margin-bottom: 16px;
+    }
+    
+    .player-main-content {
+        gap: 16px;
+    }
+    
+    .album-lyrics-section {
+        min-height: 250px;
+        padding: 20px;
+    }
+    
+    .album-art-container {
+        max-width: 200px;
+        max-height: 200px;
+        border-radius: 12px;
+    }
+    
+    .song-details-card {
+        padding: 14px;
+        gap: 8px;
+    }
+    
+    .song-title {
+        font-size: 0.95rem;
+    }
+    
+    .song-artist, .song-album {
+        font-size: 0.8rem;
+        margin-bottom: 6px;
+    }
+    
+    .song-meta-grid {
+        grid-template-columns: 1fr;
+        gap: 6px;
+        font-size: 0.75rem;
+    }
+    
+    .lyrics-placeholder-icon {
+        width: 48px;
+        height: 48px;
+        font-size: 20px;
+    }
+    
+    .lyrics-placeholder-text {
+        font-size: 1rem;
+    }
+    
+    .lyrics-placeholder-subtitle {
+        font-size: 0.8rem;
+    }
+} 
+
+/* --- 淡入淡出动画关键帧 --- */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+        transform: scale(1);
+    }
+    to {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+}
+
+/* --- 淡出动画类 --- */
+.fade-out {
+    animation: fadeOut 0.3s ease-in forwards;
+}
+
+/* --- 淡入动画类 --- */
+.fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
+} 

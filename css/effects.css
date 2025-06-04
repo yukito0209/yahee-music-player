@@ -1,0 +1,62 @@
+/* ===== 效果样式文件 ===== */
+/* 通知、拖放效果、动画等特效相关样式 */
+
+/* --- 拖放效果样式 --- */
+body.drag-over {
+    position: relative;
+}
+
+body.drag-over::before {
+    content: '拖放音频文件到这里';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: bold;
+    z-index: 10000;
+    pointer-events: none;
+}
+
+/* --- 拖拽状态下的播放列表项样式 --- */
+#playlist li.dragging {
+    opacity: 0.5;
+    transform: rotate(5deg);
+    transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+/* --- 通知样式（为将来的通知系统准备） --- */
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 12px 20px;
+    border-radius: 8px;
+    color: white;
+    font-weight: bold;
+    z-index: 10000;
+    transform: translateX(100%);
+    transition: transform 0.3s ease;
+}
+
+.notification.show {
+    transform: translateX(0);
+}
+
+.notification.error {
+    background: rgba(255, 0, 0, 0.9);
+}
+
+.notification.success {
+    background: rgba(0, 255, 0, 0.9);
+}
+
+.notification.info {
+    background: rgba(0, 123, 255, 0.9);
+} 

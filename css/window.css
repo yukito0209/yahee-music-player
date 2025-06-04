@@ -1,0 +1,132 @@
+/* ===== Linear风格窗口控制样式文件 ===== */
+/* 基于设计样例的窗口控制按钮、拖拽等相关样式 */
+
+/* --- Linear窗口控制按钮 --- */
+.window-controls {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    display: flex;
+    gap: 10px;
+    z-index: 10001; /* 确保在所有元素之上，包括Toast */
+    -webkit-app-region: no-drag; /* 按钮区域不可拖动 */
+}
+
+/* --- Linear通用窗口控制按钮样式 --- */
+.window-control-button {
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10002; /* 确保按钮本身也在最顶层 */
+    
+    /* --- Linear毛玻璃效果 --- */
+    background: var(--bg-glass);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid var(--border-subtle);
+    box-shadow: var(--shadow-subtle);
+    
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    color: var(--text-secondary);
+    
+    /* 强制确保可点击 */
+    pointer-events: auto !important;
+    -webkit-app-region: no-drag !important;
+}
+
+.window-control-button:hover {
+    background: var(--bg-glass-hover);
+    border-color: var(--border-emphasis);
+    color: var(--text-primary);
+    transform: translateY(-1px) scale(1.02);
+    box-shadow: var(--shadow-medium);
+}
+
+.window-control-button:active {
+    transform: translateY(0) scale(1);
+    background: var(--bg-glass);
+    box-shadow: var(--shadow-subtle);
+}
+
+/* --- Linear最小化按钮 --- */
+.window-control-button.minimize:hover {
+    background: linear-gradient(135deg, 
+        var(--bg-glass-hover) 0%, 
+        rgba(96, 165, 250, 0.08) 100%
+    );
+    color: var(--text-accent);
+    border-color: var(--border-accent);
+}
+
+/* --- Linear最大化按钮 --- */
+.window-control-button.maximize:hover {
+    background: linear-gradient(135deg, 
+        var(--bg-glass-hover) 0%, 
+        rgba(34, 197, 94, 0.08) 100%
+    );
+    color: #4ade80;
+    border-color: rgba(34, 197, 94, 0.2);
+}
+
+/* --- Linear关闭按钮 --- */
+.window-control-button.close:hover {
+    background: linear-gradient(135deg, 
+        var(--bg-glass-hover) 0%, 
+        rgba(239, 68, 68, 0.08) 100%
+    );
+    color: #f87171;
+    border-color: rgba(239, 68, 68, 0.2);
+}
+
+/* --- Linear按钮图标样式 --- */
+.window-control-button svg {
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.4));
+    transition: filter 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: none; /* 防止SVG阻挡点击事件 */
+}
+
+.window-control-button:hover svg {
+    filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.5));
+}
+
+/* --- 防止文本选择和拖拽冲突 --- */
+#playlist li, #toggle-playlist-btn, .window-control-button {
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    -webkit-app-region: no-drag;
+}
+
+/* --- Linear响应式 --- */
+@media (max-width: 768px) {
+    .window-controls {
+        top: 10px;
+        right: 10px;
+        gap: 8px;
+    }
+    
+    .window-control-button {
+        width: 32px;
+        height: 32px;
+        border-radius: 6px;
+    }
+}
+
+@media (max-width: 480px) {
+    .window-controls {
+        top: 8px;
+        right: 8px;
+        gap: 6px;
+    }
+    
+    .window-control-button {
+        width: 28px;
+        height: 28px;
+        border-radius: 6px;
+    }
+} 

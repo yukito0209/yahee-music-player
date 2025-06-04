@@ -1,0 +1,432 @@
+/* ===== Linear风格控制组件样式文件 ===== */
+/* 基于设计样例优化的播放控制按钮、进度条、音量控制等相关样式 */
+
+/* --- Linear播放器栏容器 --- */
+#player-bar-wrapper {
+    margin-top: auto; /* 在 flex 容器中将元素推到底部 */
+    
+    /* --- Linear毛玻璃效果 --- */
+    background: var(--bg-glass);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 12px;
+    border: 1px solid var(--border-subtle);
+    box-shadow: 
+        var(--shadow-subtle),
+        inset 0 1px 0 var(--border-subtle);
+
+    /* --- 布局和间距 --- */
+    padding: 12px 24px;
+    display: flex;
+    align-items: center;
+    margin: 0 20px 20px 20px;
+    
+    /* Linear交互效果 */
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#player-bar-wrapper:hover {
+    background: var(--bg-glass-hover);
+    border-color: var(--border-emphasis);
+    box-shadow: 
+        var(--shadow-medium),
+        inset 0 1px 0 var(--border-emphasis);
+}
+
+.custom-controls {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    gap: 20px;
+    color: var(--text-primary);
+}
+
+/* --- Linear时间显示 --- */
+.time-display {
+    font-size: 0.85rem;
+    min-width: 48px;
+    text-align: center;
+    color: var(--text-secondary);
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    font-variant-numeric: tabular-nums;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+    transition: color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.time-display:hover {
+    color: var(--text-primary);
+}
+
+.current-time {
+    text-align: right;
+}
+
+.total-time {
+    text-align: left;
+}
+
+/* --- Linear控制按钮组 --- */
+.control-buttons {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+/* --- Linear通用按钮样式 --- */
+.control-button {
+    background: var(--bg-glass);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    padding: 10px;
+    cursor: pointer;
+    color: var(--text-secondary);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    line-height: 0;
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    
+    /* Linear微妙阴影 */
+    box-shadow: var(--shadow-subtle);
+}
+
+.control-button:hover {
+    background: var(--bg-glass-hover);
+    color: var(--text-primary);
+    border-color: var(--border-emphasis);
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-medium);
+}
+
+.control-button:active {
+    transform: translateY(0) scale(0.96);
+    box-shadow: var(--shadow-subtle);
+}
+
+/* --- Linear播放/暂停按钮 --- */
+#play-pause-btn {
+    padding: 14px; 
+    background: var(--bg-glass-hover);
+    border-radius: 50%;
+    border: 1px solid var(--border-emphasis);
+    box-shadow: 
+        var(--shadow-medium),
+        inset 0 1px 0 var(--border-subtle);
+    
+    /* 特殊发光效果 */
+    position: relative;
+}
+
+#play-pause-btn::before {
+    content: '';
+    position: absolute;
+    top: -1px;
+    left: -1px;
+    right: -1px;
+    bottom: -1px;
+    background: var(--gradient-accent);
+    border-radius: 50%;
+    opacity: 0;
+    z-index: -1;
+    transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+#play-pause-btn:hover {
+    background: var(--bg-glass-hover);
+    border-color: var(--border-accent);
+    transform: translateY(-2px) scale(1.05);
+    box-shadow: 
+        var(--shadow-glow),
+        inset 0 1px 0 var(--border-emphasis);
+}
+
+#play-pause-btn:hover::before {
+    opacity: 0.1;
+}
+
+/* --- Linear进度条容器 --- */
+.progress-bar-container {
+    flex-grow: 1; 
+    height: 20px;
+    cursor: pointer; 
+    margin: 0 16px; 
+    display: flex;
+    align-items: center;
+    padding: 6px 0;
+    position: relative;
+}
+
+/* --- Linear进度条样式 - 重新设计 --- */
+.progress-bar {
+    -webkit-appearance: none; 
+    appearance: none; 
+    width: 100%; 
+    height: 6px; 
+    background: var(--bg-tertiary);
+    border-radius: 3px; 
+    outline: none; 
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid var(--border-subtle);
+    position: relative;
+    overflow: hidden;
+    
+    /* 确保默认进度值 */
+    --progress: 0%;
+}
+
+/* 进度条填充 - 使用伪元素 */
+.progress-bar::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: var(--progress, 0%);
+    background: linear-gradient(90deg, 
+        #4f46e5 0%, 
+        #7c3aed 25%, 
+        #8b5cf6 50%, 
+        #a855f7 75%,
+        #c084fc 100%
+    );
+    border-radius: 3px;
+    transition: width 0.1s ease-out;
+    z-index: 1;
+}
+
+.progress-bar:hover {
+    border-color: var(--border-emphasis);
+    transform: scaleY(1.4);
+    box-shadow: 0 0 16px rgba(139, 92, 246, 0.4);
+}
+
+.progress-bar:hover::before {
+    box-shadow: 0 0 12px rgba(139, 92, 246, 0.5);
+    /* 增加轻微的脉冲效果 */
+    animation: pulse-progress 2s ease-in-out infinite;
+}
+
+.progress-bar::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 6px;
+    cursor: pointer;
+    background: transparent;
+    border-radius: 3px;
+    border: none;
+}
+
+.progress-bar::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 0;
+    height: 0;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+.progress-bar:hover::-webkit-slider-thumb {
+    /* 悬停时保持隐藏 - Linear极简风格 */
+    width: 0;
+    height: 0;
+    background: transparent;
+    border: none;
+}
+
+.progress-bar:active::-webkit-slider-thumb {
+    /* 活动时保持隐藏 - Linear极简风格 */
+    width: 0;
+    height: 0;
+    background: transparent;
+}
+
+/* Firefox支持 */
+.progress-bar::-moz-range-thumb {
+    width: 0;
+    height: 0;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+/* --- Linear音量控制容器 --- */
+.volume-control-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 150px;
+}
+
+/* --- Linear音量滑块 - 重新设计 --- */
+.volume-slider {
+    -webkit-appearance: none; 
+    appearance: none; 
+    width: 100%;
+    height: 5px; 
+    background: var(--bg-tertiary);
+    border-radius: 3px; 
+    outline: none; 
+    cursor: pointer;
+    border: 1px solid var(--border-subtle);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+    
+    /* 确保默认音量值 */
+    --volume: 100%;
+}
+
+/* 音量条填充 - 使用伪元素 */
+.volume-slider::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: var(--volume, 100%);
+    background: linear-gradient(90deg, 
+        #4f46e5 0%, 
+        #7c3aed 25%, 
+        #8b5cf6 50%, 
+        #a855f7 75%,
+        #c084fc 100%
+    );
+    border-radius: 3px;
+    transition: width 0.1s ease-out;
+    z-index: 1;
+}
+
+.volume-slider:hover {
+    border-color: var(--border-emphasis);
+    transform: scaleY(1.6);
+    box-shadow: 0 0 12px rgba(139, 92, 246, 0.3);
+}
+
+.volume-slider:hover::before {
+    box-shadow: 0 0 10px rgba(139, 92, 246, 0.4);
+    /* 增加轻微的脉冲效果 */
+    animation: pulse-volume 2s ease-in-out infinite;
+}
+
+.volume-slider::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 5px;
+    cursor: pointer;
+    background: transparent;
+    border-radius: 3px;
+    border: none;
+}
+
+.volume-slider::-webkit-slider-thumb {
+    -webkit-appearance: none; 
+    appearance: none;
+    width: 0;
+    height: 0; 
+    background: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+.volume-slider:hover::-webkit-slider-thumb {
+    /* 悬停时保持隐藏 - Linear极简风格 */
+    width: 0;
+    height: 0;
+    background: transparent;
+    border: none;
+}
+
+/* Firefox支持 */
+.volume-slider::-moz-range-thumb {
+    width: 0;
+    height: 0;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+}
+
+/* --- Linear响应式 --- */
+@media (max-width: 768px) {
+    #player-bar-wrapper {
+        padding: 10px 20px;
+        margin: 0 16px 16px 16px;
+    }
+    
+    .custom-controls {
+        gap: 16px;
+    }
+    
+    .control-buttons {
+        gap: 12px;
+    }
+    
+    .control-button {
+        padding: 8px;
+    }
+    
+    #play-pause-btn {
+        padding: 12px;
+    }
+    
+    .progress-bar-container {
+        margin: 0 12px;
+    }
+    
+    .volume-control-container {
+        width: 120px;
+        gap: 10px;
+    }
+    
+    .time-display {
+        font-size: 0.8rem;
+        min-width: 42px;
+    }
+}
+
+@media (max-width: 480px) {
+    #player-bar-wrapper {
+        padding: 8px 16px;
+        margin: 0 12px 12px 12px;
+    }
+    
+    .custom-controls {
+        gap: 12px;
+    }
+    
+    .control-buttons {
+        gap: 8px;
+    }
+    
+    .control-button {
+        padding: 6px;
+    }
+    
+    #play-pause-btn {
+        padding: 10px;
+    }
+    
+    .progress-bar-container {
+        margin: 0 8px;
+    }
+    
+    .volume-control-container {
+        width: 100px;
+        gap: 8px;
+    }
+    
+    .time-display {
+        font-size: 0.75rem;
+        min-width: 38px;
+    }
+}
+
+/* 脉冲动画效果 */
+@keyframes pulse-progress {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.8; }
+}
+
+@keyframes pulse-volume {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.85; }
+}
